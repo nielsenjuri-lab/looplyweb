@@ -27,6 +27,8 @@ export type Item = {
   deposit: number | null
   district: string
   rules: string | null
+  pickup_hours: string | null
+  pickup_note: string | null
   image_urls: string[]
   status: 'draft' | 'moderation' | 'published' | 'archived'
   rating: number

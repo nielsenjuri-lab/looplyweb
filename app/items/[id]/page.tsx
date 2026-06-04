@@ -9,6 +9,8 @@ export default async function ItemPage({ params }: { params: Promise<{ id: strin
   const { id } = await params
   const supabase = await createClient()
 
+  const { data: { user } } = await supabase.auth.getUser()
+
   const { data: item } = await supabase
     .from('items')
     .select('*, owner:profiles(id, name, avatar_url, rating, review_count, is_verified, district)')
@@ -19,6 +21,13 @@ export default async function ItemPage({ params }: { params: Promise<{ id: strin
   if (!item) notFound()
 
   const typedItem = item as Item
+
+  const { data: unavailableRows } = await supabase
+    .from('item_unavailable_dates')
+    .select('date')
+    .eq('item_id', id)
+
+  const unavailableDates = (unavailableRows || []).map((r: { date: string }) => r.date)
 
   return (
     <div style={{ paddingBottom: 100 }}>
@@ -178,8 +187,18 @@ export default async function ItemPage({ params }: { params: Promise<{ id: strin
         )}
       </div>
 
+      {/* Pickup note */}
+      {typedItem.pickup_note && (
+        <div style={{ padding: '0 16px 16px' }}>
+          <div style={{ background: '#1A1A1A', borderRadius: 12, padding: '12px 14px', display: 'flex', gap: 10 }}>
+            <span>📍</span>
+            <p style={{ color: '#A0A0A0', fontSize: 13, lineHeight: 1.5 }}>{typedItem.pickup_note}</p>
+          </div>
+        </div>
+      )}
+
       {/* Booking widget */}
-      <BookingWidget item={typedItem} />
+      <BookingWidget item={typedItem} unavailableDates={unavailableDates} currentUserId={user?.id ?? null} />
       <BottomNav />
     </div>
   )

@@ -22,6 +22,8 @@ export default function CreatePage() {
     price_per_day: '',
     deposit: '',
     rules: '',
+    pickup_hours: '',
+    pickup_note: '',
   })
 
   function update(key: string, value: string) {
@@ -75,6 +77,8 @@ export default function CreatePage() {
         price_per_day: parseFloat(form.price_per_day),
         deposit: form.deposit ? parseFloat(form.deposit) : null,
         rules: form.rules || null,
+        pickup_hours: form.pickup_hours || null,
+        pickup_note: form.pickup_note || null,
         status: 'moderation',
         image_urls: imageUrls,
       })
@@ -220,6 +224,24 @@ export default function CreatePage() {
             value={form.rules}
             onChange={(e) => update('rules', e.target.value)}
             rows={3}
+            style={{ resize: 'vertical' }}
+          />
+        </Field>
+
+        <Field label="🕐 Время выдачи">
+          <input
+            placeholder="Например: Пн–Пт после 19:00, Сб–Вс 10:00–15:00"
+            value={form.pickup_hours}
+            onChange={(e) => update('pickup_hours', e.target.value)}
+          />
+        </Field>
+
+        <Field label="📍 Место самовывоза">
+          <textarea
+            placeholder="Например: метро Невский пр., договариваемся в чате. Прошу не звонить после 21:00."
+            value={form.pickup_note}
+            onChange={(e) => update('pickup_note', e.target.value)}
+            rows={2}
             style={{ resize: 'vertical' }}
           />
         </Field>
