@@ -4,11 +4,15 @@ import BottomNav from '@/components/BottomNav'
 import SignOutButton from '@/components/SignOutButton'
 import Link from 'next/link'
 
+const ADMIN_USER_ID = 'fabb7245-b2f7-47bb-a0a7-aee2651388f5'
+
 export default async function ProfilePage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) redirect('/auth')
+
+  const isAdmin = user.id === ADMIN_USER_ID
 
   const { data: profile } = await supabase
     .from('profiles')
@@ -56,6 +60,25 @@ export default async function ProfilePage() {
             )}
           </div>
         </div>
+
+        {/* Admin button */}
+        {isAdmin && (
+          <Link href="/admin" style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            background: 'rgba(123,92,240,0.1)',
+            border: '1px solid rgba(123,92,240,0.3)',
+            borderRadius: 14, padding: '14px 16px', marginBottom: 16,
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ fontSize: 20 }}>🛡️</span>
+              <div>
+                <p style={{ color: '#7B5CF0', fontWeight: 600, fontSize: 14 }}>Панель модерации</p>
+                <p style={{ color: '#606060', fontSize: 12 }}>Проверить новые объявления</p>
+              </div>
+            </div>
+            <span style={{ color: '#7B5CF0' }}>→</span>
+          </Link>
+        )}
 
         {/* Stats */}
         <div style={{
