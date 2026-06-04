@@ -22,7 +22,7 @@ export default async function ProfilePage() {
 
   const { data: myItems } = await supabase
     .from('items')
-    .select('id, title, price_per_day, status, image_urls')
+    .select('id, title, price_per_day, status, image_urls, reject_reason')
     .eq('owner_id', user.id)
     .order('created_at', { ascending: false })
 
@@ -149,12 +149,25 @@ export default async function ProfilePage() {
                   </div>
                   <div style={{
                     padding: '3px 8px', borderRadius: 20, fontSize: 11,
-                    background: item.status === 'published' ? 'rgba(76,175,80,0.15)' : 'rgba(255,183,0,0.15)',
-                    color: item.status === 'published' ? '#4CAF50' : '#FFB700',
+                    background: item.status === 'published' ? 'rgba(76,175,80,0.15)' : item.status === 'archived' ? 'rgba(255,77,77,0.12)' : 'rgba(255,183,0,0.15)',
+                    color: item.status === 'published' ? '#4CAF50' : item.status === 'archived' ? '#FF4D4D' : '#FFB700',
                   }}>
-                    {item.status === 'published' ? 'Активно' : item.status === 'moderation' ? 'Модерация' : item.status}
+                    {item.status === 'published' ? 'Активно' : item.status === 'moderation' ? 'На проверке' : 'Отклонено'}
                   </div>
                 </Link>
+                {item.status === 'archived' && item.reject_reason && (
+                  <div style={{
+                    background: 'rgba(255,77,77,0.08)',
+                    border: '1px solid rgba(255,77,77,0.2)',
+                    borderRadius: '0 0 12px 12px',
+                    padding: '8px 12px',
+                    marginTop: -4,
+                  }}>
+                    <p style={{ color: '#FF4D4D', fontSize: 12 }}>
+                      ✉️ Причина: {item.reject_reason}
+                    </p>
+                  </div>
+                )}
               ))}
             </div>
           )}
