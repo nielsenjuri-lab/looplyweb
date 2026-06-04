@@ -108,7 +108,7 @@ export default async function AdminPage() {
                       {item.title}
                     </p>
                     <p style={{ color: '#606060', fontSize: 12, marginTop: 2 }}>
-                      от {(item.owner as { name: string })?.name || 'Пользователь'}
+                      от {(item.owner as unknown as { name: string })?.name || 'Пользователь'}
                     </p>
                   </div>
                   <span style={{

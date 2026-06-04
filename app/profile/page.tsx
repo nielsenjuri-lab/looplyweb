@@ -125,8 +125,11 @@ export default async function ProfilePage() {
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {myItems.map((item) => (
-                <Link key={item.id} href={`/items/${item.id}`} style={{
+              {myItems.map((item) => {
+                const typedItem = item as typeof item & { reject_reason?: string | null }
+                return (
+                <div key={item.id}>
+                <Link href={`/items/${item.id}`} style={{
                   display: 'flex', alignItems: 'center', gap: 12,
                   background: '#1A1A1A', borderRadius: 12, padding: '12px',
                 }}>
@@ -155,7 +158,7 @@ export default async function ProfilePage() {
                     {item.status === 'published' ? 'Активно' : item.status === 'moderation' ? 'На проверке' : 'Отклонено'}
                   </div>
                 </Link>
-                {item.status === 'archived' && item.reject_reason && (
+                {item.status === 'archived' && typedItem.reject_reason && (
                   <div style={{
                     background: 'rgba(255,77,77,0.08)',
                     border: '1px solid rgba(255,77,77,0.2)',
@@ -164,11 +167,13 @@ export default async function ProfilePage() {
                     marginTop: -4,
                   }}>
                     <p style={{ color: '#FF4D4D', fontSize: 12 }}>
-                      ✉️ Причина: {item.reject_reason}
+                      ✉️ Причина: {typedItem.reject_reason}
                     </p>
                   </div>
                 )}
-              ))}
+                </div>
+                )
+              })}
             </div>
           )}
         </div>
