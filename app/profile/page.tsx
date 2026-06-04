@@ -126,55 +126,49 @@ export default async function ProfilePage() {
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {myItems.map((item) => {
-                const typedItem = item as typeof item & { reject_reason?: string | null }
+                const reject = (item as typeof item & { reject_reason?: string | null }).reject_reason
+                const rowContent = (
+                  <>
+                    <div style={{ width: 48, height: 48, borderRadius: 10, background: '#222', overflow: 'hidden', flexShrink: 0 }}>
+                      {item.image_urls?.[0]
+                        // eslint-disable-next-line @next/next/no-img-element
+                        ? <img src={item.image_urls[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>📦</div>}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ color: '#fff', fontSize: 14, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {item.title}
+                      </p>
+                      <p style={{ color: '#7B5CF0', fontSize: 13, marginTop: 2 }}>
+                        {item.price_per_day.toLocaleString('ru-RU')} ₽/день
+                      </p>
+                    </div>
+                    <div style={{
+                      padding: '3px 8px', borderRadius: 20, fontSize: 11, flexShrink: 0,
+                      background: item.status === 'published' ? 'rgba(76,175,80,0.15)' : item.status === 'archived' ? 'rgba(255,77,77,0.12)' : 'rgba(255,183,0,0.15)',
+                      color: item.status === 'published' ? '#4CAF50' : item.status === 'archived' ? '#FF4D4D' : '#FFB700',
+                    }}>
+                      {item.status === 'published' ? 'Активно' : item.status === 'moderation' ? 'На проверке' : 'Отклонено'}
+                    </div>
+                  </>
+                )
                 return (
-                <div key={item.id}>
-                <div style={{
-                  display: 'flex', alignItems: 'center', gap: 12,
-                  background: '#1A1A1A', borderRadius: 12, padding: '12px',
-                  cursor: item.status === 'published' ? 'pointer' : 'default',
-                }}
-                onClick={() => { if (item.status === 'published') window.location.href = `/items/${item.id}` }}
-                >
-                  <div style={{
-                    width: 48, height: 48, borderRadius: 10,
-                    background: '#222', overflow: 'hidden', flexShrink: 0,
-                  }}>
-                    {item.image_urls?.[0] ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={item.image_urls[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    ) : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>📦</div>}
+                  <div key={item.id}>
+                    {item.status === 'published' ? (
+                      <Link href={`/items/${item.id}`} style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#1A1A1A', borderRadius: 12, padding: '12px' }}>
+                        {rowContent}
+                      </Link>
+                    ) : (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#1A1A1A', borderRadius: 12, padding: '12px' }}>
+                        {rowContent}
+                      </div>
+                    )}
+                    {item.status === 'archived' && reject && (
+                      <div style={{ background: 'rgba(255,77,77,0.08)', border: '1px solid rgba(255,77,77,0.2)', borderRadius: '0 0 12px 12px', padding: '8px 12px', marginTop: -4 }}>
+                        <p style={{ color: '#FF4D4D', fontSize: 12 }}>✉️ Причина: {reject}</p>
+                      </div>
+                    )}
                   </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ color: '#fff', fontSize: 14, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {item.title}
-                    </p>
-                    <p style={{ color: '#7B5CF0', fontSize: 13, marginTop: 2 }}>
-                      {item.price_per_day.toLocaleString('ru-RU')} ₽/день
-                    </p>
-                  </div>
-                  <div style={{
-                    padding: '3px 8px', borderRadius: 20, fontSize: 11,
-                    background: item.status === 'published' ? 'rgba(76,175,80,0.15)' : item.status === 'archived' ? 'rgba(255,77,77,0.12)' : 'rgba(255,183,0,0.15)',
-                    color: item.status === 'published' ? '#4CAF50' : item.status === 'archived' ? '#FF4D4D' : '#FFB700',
-                  }}>
-                    {item.status === 'published' ? 'Активно' : item.status === 'moderation' ? 'На проверке' : 'Отклонено'}
-                  </div>
-                </div>
-                {item.status === 'archived' && typedItem.reject_reason && (
-                  <div style={{
-                    background: 'rgba(255,77,77,0.08)',
-                    border: '1px solid rgba(255,77,77,0.2)',
-                    borderRadius: '0 0 12px 12px',
-                    padding: '8px 12px',
-                    marginTop: -4,
-                  }}>
-                    <p style={{ color: '#FF4D4D', fontSize: 12 }}>
-                      ✉️ Причина: {typedItem.reject_reason}
-                    </p>
-                  </div>
-                )}
-                </div>
                 )
               })}
             </div>
