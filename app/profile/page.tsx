@@ -129,10 +129,13 @@ export default async function ProfilePage() {
                 const typedItem = item as typeof item & { reject_reason?: string | null }
                 return (
                 <div key={item.id}>
-                <Link href={`/items/${item.id}`} style={{
+                <div style={{
                   display: 'flex', alignItems: 'center', gap: 12,
                   background: '#1A1A1A', borderRadius: 12, padding: '12px',
-                }}>
+                  cursor: item.status === 'published' ? 'pointer' : 'default',
+                }}
+                onClick={() => { if (item.status === 'published') window.location.href = `/items/${item.id}` }}
+                >
                   <div style={{
                     width: 48, height: 48, borderRadius: 10,
                     background: '#222', overflow: 'hidden', flexShrink: 0,
@@ -157,7 +160,7 @@ export default async function ProfilePage() {
                   }}>
                     {item.status === 'published' ? 'Активно' : item.status === 'moderation' ? 'На проверке' : 'Отклонено'}
                   </div>
-                </Link>
+                </div>
                 {item.status === 'archived' && typedItem.reject_reason && (
                   <div style={{
                     background: 'rgba(255,77,77,0.08)',
