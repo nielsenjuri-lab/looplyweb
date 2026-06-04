@@ -4,12 +4,15 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
-export default function AdminActions({ itemId }: { itemId: string }) {
+type Mode = 'moderation' | 'published'
+
+export default function AdminActions({ itemId, mode = 'moderation' }: { itemId: string; mode?: Mode }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [rejectReason, setRejectReason] = useState('')
   const [adminNote, setAdminNote] = useState('')
   const [showRejectForm, setShowRejectForm] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
 
   async function publish() {
     setLoading(true)
@@ -22,8 +25,16 @@ export default function AdminActions({ itemId }: { itemId: string }) {
     setLoading(false)
   }
 
+  async function unpublish() {
+    setLoading(true)
+    const supabase = createClient()
+    await supabase.from('items').update({ status: 'moderation' }).eq('id', itemId)
+    router.refresh()
+    setLoading(false)
+  }
+
   async function reject() {
-    if (!rejectReason.trim()) {
+    if (!showRejectForm) {
       setShowRejectForm(true)
       return
     }
@@ -31,16 +42,63 @@ export default function AdminActions({ itemId }: { itemId: string }) {
     const supabase = createClient()
     await supabase.from('items').update({
       status: 'archived',
-      reject_reason: rejectReason,
+      reject_reason: rejectReason || null,
       admin_note: adminNote || null,
     }).eq('id', itemId)
     router.refresh()
     setLoading(false)
   }
 
+  async function deleteItem() {
+    if (!confirmDelete) {
+      setConfirmDelete(true)
+      return
+    }
+    setLoading(true)
+    const supabase = createClient()
+    await supabase.from('items').delete().eq('id', itemId)
+    router.refresh()
+    setLoading(false)
+  }
+
+  if (mode === 'published') {
+    return (
+      <div style={{ display: 'flex', gap: 8, width: '100%' }}>
+        <button
+          onClick={unpublish}
+          disabled={loading}
+          style={{
+            flex: 1, padding: '9px', borderRadius: 10,
+            background: 'rgba(255,183,0,0.12)',
+            border: '1px solid rgba(255,183,0,0.25)',
+            color: '#FFB700', fontWeight: 600, fontSize: 13,
+            cursor: loading ? 'not-allowed' : 'pointer',
+            opacity: loading ? 0.5 : 1,
+          }}
+        >
+          ↩ Снять с публикации
+        </button>
+        <button
+          onClick={deleteItem}
+          disabled={loading}
+          style={{
+            flex: 1, padding: '9px', borderRadius: 10,
+            background: confirmDelete ? 'rgba(255,77,77,0.3)' : 'rgba(255,77,77,0.1)',
+            border: '1px solid rgba(255,77,77,0.3)',
+            color: '#FF4D4D', fontWeight: 600, fontSize: 13,
+            cursor: loading ? 'not-allowed' : 'pointer',
+            opacity: loading ? 0.5 : 1,
+          }}
+        >
+          {confirmDelete ? '⚠️ Точно удалить?' : '🗑 Удалить'}
+        </button>
+      </div>
+    )
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-      {/* Admin note (internal) */}
+      {/* Admin note */}
       <div>
         <label style={{ fontSize: 11, color: '#606060', display: 'block', marginBottom: 4 }}>
           📝 Заметка для себя (не видна пользователю)
@@ -54,7 +112,7 @@ export default function AdminActions({ itemId }: { itemId: string }) {
         />
       </div>
 
-      {/* Reject reason (visible to user) */}
+      {/* Reject reason */}
       {showRejectForm && (
         <div>
           <label style={{ fontSize: 11, color: '#FF4D4D', display: 'block', marginBottom: 4 }}>

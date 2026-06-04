@@ -90,26 +90,38 @@ export default async function AdminPage() {
         </div>
       )}
 
-      {/* Recently published */}
+      {/* Published items — full management */}
       {published && published.length > 0 && (
         <div>
           <h2 style={{ color: '#A0A0A0', fontSize: 13, fontWeight: 600, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1 }}>
-            Недавно опубликованные
+            Опубликованные объявления
           </h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {published.map((item) => (
               <div key={item.id} style={{
-                background: '#1A1A1A', borderRadius: 10, padding: '10px 14px',
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                background: '#1A1A1A', borderRadius: 14,
+                border: '1px solid #2A2A2A', overflow: 'hidden',
               }}>
-                <p style={{ color: '#fff', fontSize: 14 }}>{item.title}</p>
-                <span style={{
-                  fontSize: 11, color: '#4CAF50',
-                  background: 'rgba(76,175,80,0.12)',
-                  padding: '3px 8px', borderRadius: 20,
-                }}>
-                  Активно
-                </span>
+                <div style={{ padding: '12px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ color: '#fff', fontSize: 14, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {item.title}
+                    </p>
+                    <p style={{ color: '#606060', fontSize: 12, marginTop: 2 }}>
+                      от {(item.owner as { name: string })?.name || 'Пользователь'}
+                    </p>
+                  </div>
+                  <span style={{
+                    fontSize: 11, color: '#4CAF50', flexShrink: 0,
+                    background: 'rgba(76,175,80,0.12)',
+                    padding: '3px 8px', borderRadius: 20,
+                  }}>
+                    Активно
+                  </span>
+                </div>
+                <div style={{ borderTop: '1px solid #2A2A2A', padding: '10px 14px', display: 'flex', gap: 8 }}>
+                  <AdminActions itemId={item.id} mode="published" />
+                </div>
               </div>
             ))}
           </div>
