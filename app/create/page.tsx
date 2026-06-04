@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { CATEGORIES, SPB_DISTRICTS } from '@/lib/types'
@@ -10,6 +10,9 @@ export default function CreatePage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [photos, setPhotos] = useState<File[]>([])
+  const [previews, setPreviews] = useState<string[]>([])
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [form, setForm] = useState({
     title: '',
@@ -23,6 +26,17 @@ export default function CreatePage() {
 
   function update(key: string, value: string) {
     setForm((f) => ({ ...f, [key]: value }))
+  }
+
+  function handlePhotos(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files || []).slice(0, 5)
+    setPhotos(files)
+    setPreviews(files.map((f) => URL.createObjectURL(f)))
+  }
+
+  function removePhoto(i: number) {
+    setPhotos((p) => p.filter((_, idx) => idx !== i))
+    setPreviews((p) => p.filter((_, idx) => idx !== i))
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -39,6 +53,19 @@ export default function CreatePage() {
     }
 
     try {
+      // Upload photos
+      const imageUrls: string[] = []
+      for (const photo of photos) {
+        const ext = photo.name.split('.').pop()
+        const path = `${user.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+        const { error: uploadError } = await supabase.storage
+          .from('items')
+          .upload(path, photo, { contentType: photo.type })
+        if (uploadError) throw uploadError
+        const { data } = supabase.storage.from('items').getPublicUrl(path)
+        imageUrls.push(data.publicUrl)
+      }
+
       const { error } = await supabase.from('items').insert({
         owner_id: user.id,
         title: form.title,
@@ -49,7 +76,7 @@ export default function CreatePage() {
         deposit: form.deposit ? parseFloat(form.deposit) : null,
         rules: form.rules || null,
         status: 'moderation',
-        image_urls: [],
+        image_urls: imageUrls,
       })
 
       if (error) throw error
@@ -69,6 +96,64 @@ export default function CreatePage() {
       </header>
 
       <form onSubmit={handleSubmit} style={{ padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+        {/* Photo upload */}
+        <div>
+          <label style={{ display: 'block', fontSize: 13, color: '#A0A0A0', marginBottom: 8, fontWeight: 500 }}>
+            Фотографии (до 5 штук)
+          </label>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            {/* Previews */}
+            {previews.map((src, i) => (
+              <div key={i} style={{ position: 'relative', width: 80, height: 80 }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={src} alt="" style={{
+                  width: 80, height: 80, borderRadius: 12,
+                  objectFit: 'cover', border: '1px solid #2A2A2A',
+                }} />
+                <button
+                  type="button"
+                  onClick={() => removePhoto(i)}
+                  style={{
+                    position: 'absolute', top: -6, right: -6,
+                    width: 22, height: 22, borderRadius: '50%',
+                    background: '#FF4D4D', color: '#fff',
+                    fontSize: 14, display: 'flex',
+                    alignItems: 'center', justifyContent: 'center',
+                    fontWeight: 700,
+                  }}
+                >×</button>
+              </div>
+            ))}
+
+            {/* Add button */}
+            {photos.length < 5 && (
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                style={{
+                  width: 80, height: 80, borderRadius: 12,
+                  border: '2px dashed #2A2A2A',
+                  background: '#1A1A1A',
+                  display: 'flex', flexDirection: 'column',
+                  alignItems: 'center', justifyContent: 'center',
+                  gap: 4, color: '#606060', fontSize: 11,
+                }}
+              >
+                <span style={{ fontSize: 24 }}>+</span>
+                <span>Фото</span>
+              </button>
+            )}
+          </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={handlePhotos}
+            style={{ display: 'none' }}
+          />
+        </div>
 
         <Field label="Название *">
           <input
