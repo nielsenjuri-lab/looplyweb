@@ -22,12 +22,6 @@ export default async function ItemPage({ params }: { params: Promise<{ id: strin
 
   const typedItem = item as Item
 
-  const { data: unavailableRows } = await supabase
-    .from('item_unavailable_dates')
-    .select('date')
-    .eq('item_id', id)
-
-  const unavailableDates = (unavailableRows || []).map((r: { date: string }) => r.date)
 
   return (
     <div style={{ paddingBottom: 100 }}>
@@ -198,7 +192,7 @@ export default async function ItemPage({ params }: { params: Promise<{ id: strin
       )}
 
       {/* Booking widget */}
-      <BookingWidget item={typedItem} unavailableDates={unavailableDates} currentUserId={user?.id ?? null} />
+      <BookingWidget item={typedItem} currentUserId={user?.id ?? null} />
       <BottomNav />
     </div>
   )

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { CATEGORIES, SPB_DISTRICTS } from '@/lib/types'
 import BottomNav from '@/components/BottomNav'
+import AvailabilityCalendar, { type AvailableSlot } from '@/components/AvailabilityCalendar'
 
 export default function CreatePage() {
   const router = useRouter()
@@ -12,6 +13,7 @@ export default function CreatePage() {
   const [error, setError] = useState('')
   const [photos, setPhotos] = useState<File[]>([])
   const [previews, setPreviews] = useState<string[]>([])
+  const [availableSlots, setAvailableSlots] = useState<AvailableSlot[]>([])
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [form, setForm] = useState({
@@ -68,7 +70,7 @@ export default function CreatePage() {
         imageUrls.push(data.publicUrl)
       }
 
-      const { error } = await supabase.from('items').insert({
+      const { data, error } = await supabase.from('items').insert({
         owner_id: user.id,
         title: form.title,
         description: form.description,
@@ -81,9 +83,17 @@ export default function CreatePage() {
         pickup_note: form.pickup_note || null,
         status: 'moderation',
         image_urls: imageUrls,
-      })
+      }).select('id').single()
 
       if (error) throw error
+
+      // Save available slots
+      if (data && availableSlots.length > 0) {
+        await supabase.from('item_available_dates').insert(
+          availableSlots.map(s => ({ item_id: data.id, date: s.date, time_from: s.time_from, time_to: s.time_to }))
+        )
+      }
+
       router.push('/profile')
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Ошибка при создании')
@@ -245,6 +255,20 @@ export default function CreatePage() {
             style={{ resize: 'vertical' }}
           />
         </Field>
+
+        {/* Availability calendar */}
+        <div>
+          <label style={{ display: 'block', fontSize: 13, color: '#A0A0A0', marginBottom: 8, fontWeight: 500 }}>
+            📅 Когда готовы передать вещь
+          </label>
+          <p style={{ color: '#606060', fontSize: 12, marginBottom: 12, lineHeight: 1.5 }}>
+            Выберите дни когда сможете встретиться с арендатором и задайте время. Арендатор сможет бронировать только эти дни.
+          </p>
+          <AvailabilityCalendar
+            value={availableSlots}
+            onChange={setAvailableSlots}
+          />
+        </div>
 
         {error && (
           <div style={{
