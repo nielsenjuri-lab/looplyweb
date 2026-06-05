@@ -37,8 +37,9 @@ export default function AvailabilityCalendar({ value, onChange }: Props) {
   const [month, setMonth] = useState(today.getMonth())
   const [globalTimeFrom, setGlobalTimeFrom] = useState('18:00')
   const [globalTimeTo, setGlobalTimeTo] = useState('21:00')
-  const [useGlobalTime, setUseGlobalTime] = useState(true)
+  const [useIndividualTime, setUseIndividualTime] = useState(false)
   const [applied, setApplied] = useState(false)
+  const [expandedDate, setExpandedDate] = useState<string | null>(null)
 
   const slotMap = new Map(value.map(s => [s.date, s]))
 
@@ -46,8 +47,10 @@ export default function AvailabilityCalendar({ value, onChange }: Props) {
     if (dateStr < todayStr) return
     if (slotMap.has(dateStr)) {
       onChange(value.filter(s => s.date !== dateStr))
+      if (expandedDate === dateStr) setExpandedDate(null)
     } else {
       onChange([...value, { date: dateStr, time_from: globalTimeFrom, time_to: globalTimeTo }])
+      if (useIndividualTime) setExpandedDate(dateStr)
     }
   }
 
@@ -148,11 +151,11 @@ export default function AvailabilityCalendar({ value, onChange }: Props) {
         <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10, cursor: 'pointer' }}>
           <input
             type="checkbox"
-            checked={useGlobalTime}
-            onChange={(e) => setUseGlobalTime(e.target.checked)}
+            checked={useIndividualTime}
+            onChange={(e) => setUseIndividualTime(e.target.checked)}
             style={{ width: 'auto' }}
           />
-          <span style={{ color: '#606060', fontSize: 12 }}>Разное время для каждого дня</span>
+          <span style={{ color: '#A0A0A0', fontSize: 12 }}>Разное время для каждого дня</span>
         </label>
       </div>
 
@@ -236,37 +239,77 @@ export default function AvailabilityCalendar({ value, onChange }: Props) {
         </div>
       </div>
 
-      {/* Selected dates this month — individual time if needed */}
-      {!useGlobalTime && selectedThisMonth.length > 0 && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 8 }}>
-          <p style={{ color: '#A0A0A0', fontSize: 12, fontWeight: 600 }}>Время по дням:</p>
-          {selectedThisMonth.sort((a,b) => a.date.localeCompare(b.date)).map(slot => (
+      {/* Individual time per day */}
+      {useIndividualTime && value.length > 0 && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 8 }}>
+          <p style={{ color: '#A0A0A0', fontSize: 12, fontWeight: 600, marginBottom: 4 }}>
+            Время по дням:
+          </p>
+          {[...value].sort((a, b) => a.date.localeCompare(b.date)).map(slot => (
             <div key={slot.date} style={{
-              background: '#1A1A1A', borderRadius: 10, padding: '10px 12px',
-              display: 'flex', alignItems: 'center', gap: 10,
+              background: '#1A1A1A',
+              border: expandedDate === slot.date ? '1px solid rgba(123,92,240,0.4)' : '1px solid #2A2A2A',
+              borderRadius: 12,
+              overflow: 'hidden',
+              transition: 'border-color 0.2s',
             }}>
-              <span style={{ color: '#4CAF50', fontSize: 13, minWidth: 80 }}>
-                {new Date(slot.date + 'T12:00:00').toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}
-              </span>
-              <input
-                type="time"
-                value={slot.time_from}
-                onChange={(e) => updateSlotTime(slot.date, 'time_from', e.target.value)}
-                style={{ padding: '6px 8px', fontSize: 13, flex: 1 }}
-              />
-              <span style={{ color: '#606060', fontSize: 12 }}>—</span>
-              <input
-                type="time"
-                value={slot.time_to}
-                onChange={(e) => updateSlotTime(slot.date, 'time_to', e.target.value)}
-                style={{ padding: '6px 8px', fontSize: 13, flex: 1 }}
-              />
+              {/* Row header — click to expand/collapse */}
+              <button
+                type="button"
+                onClick={() => setExpandedDate(expandedDate === slot.date ? null : slot.date)}
+                style={{
+                  width: '100%', background: 'transparent', border: 'none',
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  padding: '10px 14px', cursor: 'pointer',
+                }}
+              >
+                <span style={{ color: '#4CAF50', fontSize: 13, fontWeight: 600 }}>
+                  {new Date(slot.date + 'T12:00:00').toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', weekday: 'short' })}
+                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ color: '#A0A0A0', fontSize: 12 }}>
+                    {slot.time_from} — {slot.time_to}
+                  </span>
+                  <span style={{ color: '#606060', fontSize: 14 }}>
+                    {expandedDate === slot.date ? '▲' : '▼'}
+                  </span>
+                </div>
+              </button>
+
+              {/* Expanded time inputs */}
+              {expandedDate === slot.date && (
+                <div style={{
+                  display: 'flex', gap: 10, padding: '0 14px 12px',
+                  alignItems: 'center',
+                }}>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ display: 'block', fontSize: 11, color: '#606060', marginBottom: 4 }}>С</label>
+                    <input
+                      type="time"
+                      value={slot.time_from}
+                      onChange={(e) => updateSlotTime(slot.date, 'time_from', e.target.value)}
+                      style={{ padding: '8px 10px', fontSize: 14 }}
+                    />
+                  </div>
+                  <span style={{ color: '#606060', fontSize: 14, marginTop: 18 }}>—</span>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ display: 'block', fontSize: 11, color: '#606060', marginBottom: 4 }}>До</label>
+                    <input
+                      type="time"
+                      value={slot.time_to}
+                      onChange={(e) => updateSlotTime(slot.date, 'time_to', e.target.value)}
+                      style={{ padding: '8px 10px', fontSize: 14 }}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           ))}
         </div>
       )}
 
-      {value.length > 0 && (
+      {/* Global time summary (when not in individual mode) */}
+      {!useIndividualTime && value.length > 0 && (
         <p style={{ color: '#4CAF50', fontSize: 12, marginTop: 8 }}>
           ✓ Выбрано {value.length} {value.length === 1 ? 'день' : value.length < 5 ? 'дня' : 'дней'}
         </p>
