@@ -137,12 +137,6 @@ export default function BookingWidget({ item, currentUserId }: {
       borderTop: '1px solid #2A2A2A', padding: '16px', zIndex: 90,
       maxHeight: '70vh', overflowY: 'auto',
     }}>
-      {/* Pickup hours */}
-      {item.pickup_hours && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, fontSize: 12, color: '#A0A0A0' }}>
-          <span>🕐</span><span>Выдача: {item.pickup_hours}</span>
-        </div>
-      )}
 
       {/* Calendar header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>

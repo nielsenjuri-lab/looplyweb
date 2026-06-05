@@ -186,7 +186,10 @@ export default async function ItemPage({ params }: { params: Promise<{ id: strin
         <div style={{ padding: '0 16px 16px' }}>
           <div style={{ background: '#1A1A1A', borderRadius: 12, padding: '12px 14px', display: 'flex', gap: 10 }}>
             <span>📍</span>
-            <p style={{ color: '#A0A0A0', fontSize: 13, lineHeight: 1.5 }}>{typedItem.pickup_note}</p>
+            <div>
+              <p style={{ color: '#fff', fontSize: 13, fontWeight: 500, marginBottom: 2 }}>Самовывоз</p>
+              <p style={{ color: '#A0A0A0', fontSize: 13, lineHeight: 1.5 }}>{typedItem.pickup_note}</p>
+            </div>
           </div>
         </div>
       )}

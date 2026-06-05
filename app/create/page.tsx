@@ -238,14 +238,6 @@ export default function CreatePage() {
           />
         </Field>
 
-        <Field label="🕐 Время выдачи">
-          <input
-            placeholder="Например: Пн–Пт после 19:00, Сб–Вс 10:00–15:00"
-            value={form.pickup_hours}
-            onChange={(e) => update('pickup_hours', e.target.value)}
-          />
-        </Field>
-
         <Field label="📍 Место самовывоза">
           <textarea
             placeholder="Например: метро Невский пр., договариваемся в чате. Прошу не звонить после 21:00."
