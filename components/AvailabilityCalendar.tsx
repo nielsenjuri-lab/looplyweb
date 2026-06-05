@@ -38,6 +38,7 @@ export default function AvailabilityCalendar({ value, onChange }: Props) {
   const [globalTimeFrom, setGlobalTimeFrom] = useState('18:00')
   const [globalTimeTo, setGlobalTimeTo] = useState('21:00')
   const [useGlobalTime, setUseGlobalTime] = useState(true)
+  const [applied, setApplied] = useState(false)
 
   const slotMap = new Map(value.map(s => [s.date, s]))
 
@@ -56,6 +57,7 @@ export default function AvailabilityCalendar({ value, onChange }: Props) {
 
   function applyGlobalTime() {
     onChange(value.map(s => ({ ...s, time_from: globalTimeFrom, time_to: globalTimeTo })))
+    setApplied(true)
   }
 
   function prevMonth() {
@@ -90,13 +92,13 @@ export default function AvailabilityCalendar({ value, onChange }: Props) {
         <p style={{ color: '#fff', fontSize: 13, fontWeight: 600, marginBottom: 10 }}>
           🕐 Время выдачи для всех дней
         </p>
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: 10, alignItems: 'flex-end' }}>
           <div style={{ flex: 1 }}>
             <label style={{ display: 'block', fontSize: 11, color: '#606060', marginBottom: 4 }}>С</label>
             <input
               type="time"
               value={globalTimeFrom}
-              onChange={(e) => setGlobalTimeFrom(e.target.value)}
+              onChange={(e) => { setGlobalTimeFrom(e.target.value); setApplied(false) }}
               style={{ padding: '8px 12px', fontSize: 14 }}
             />
           </div>
@@ -105,26 +107,44 @@ export default function AvailabilityCalendar({ value, onChange }: Props) {
             <input
               type="time"
               value={globalTimeTo}
-              onChange={(e) => setGlobalTimeTo(e.target.value)}
+              onChange={(e) => { setGlobalTimeTo(e.target.value); setApplied(false) }}
               style={{ padding: '8px 12px', fontSize: 14 }}
             />
           </div>
-          {value.length > 0 && (
-            <button
-              type="button"
-              onClick={applyGlobalTime}
-              style={{
-                background: 'rgba(123,92,240,0.15)',
-                border: '1px solid rgba(123,92,240,0.3)',
-                borderRadius: 10, padding: '8px 12px',
-                color: '#7B5CF0', fontSize: 12, fontWeight: 600,
-                marginTop: 16, cursor: 'pointer',
-              }}
-            >
-              Применить
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={applyGlobalTime}
+            style={{
+              background: applied ? 'rgba(76,175,80,0.2)' : 'rgba(123,92,240,0.15)',
+              border: `1px solid ${applied ? 'rgba(76,175,80,0.4)' : 'rgba(123,92,240,0.3)'}`,
+              borderRadius: 10, padding: '10px 12px',
+              color: applied ? '#4CAF50' : '#7B5CF0',
+              fontSize: 12, fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {applied ? '✓ Применено' : 'Применить'}
+          </button>
         </div>
+
+        {/* Applied summary */}
+        {applied && value.length > 0 && (
+          <div style={{
+            marginTop: 10,
+            background: 'rgba(76,175,80,0.1)',
+            border: '1px solid rgba(76,175,80,0.25)',
+            borderRadius: 10, padding: '8px 12px',
+            display: 'flex', alignItems: 'center', gap: 8,
+          }}>
+            <span style={{ color: '#4CAF50', fontSize: 13 }}>✓</span>
+            <span style={{ color: '#4CAF50', fontSize: 13 }}>
+              Для всех {value.length} {value.length === 1 ? 'дня' : value.length < 5 ? 'дней' : 'дней'}: {globalTimeFrom} — {globalTimeTo}
+            </span>
+          </div>
+        )}
+
         <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10, cursor: 'pointer' }}>
           <input
             type="checkbox"
