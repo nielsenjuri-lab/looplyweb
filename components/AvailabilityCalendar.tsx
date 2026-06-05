@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 
 const MONTH_NAMES = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь']
 const DAY_NAMES = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс']
@@ -40,6 +40,7 @@ export default function AvailabilityCalendar({ value, onChange }: Props) {
   const [useIndividualTime, setUseIndividualTime] = useState(false)
   const [applied, setApplied] = useState(false)
   const [expandedDate, setExpandedDate] = useState<string | null>(null)
+  const rowRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
   const slotMap = new Map(value.map(s => [s.date, s]))
 
@@ -50,7 +51,12 @@ export default function AvailabilityCalendar({ value, onChange }: Props) {
       if (expandedDate === dateStr) setExpandedDate(null)
     } else {
       onChange([...value, { date: dateStr, time_from: globalTimeFrom, time_to: globalTimeTo }])
-      if (useIndividualTime) setExpandedDate(dateStr)
+      if (useIndividualTime) {
+        setExpandedDate(dateStr)
+        setTimeout(() => {
+          rowRefs.current[dateStr]?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        }, 80)
+      }
     }
   }
 
@@ -246,13 +252,17 @@ export default function AvailabilityCalendar({ value, onChange }: Props) {
             Время по дням:
           </p>
           {[...value].sort((a, b) => a.date.localeCompare(b.date)).map(slot => (
-            <div key={slot.date} style={{
-              background: '#1A1A1A',
-              border: expandedDate === slot.date ? '1px solid rgba(123,92,240,0.4)' : '1px solid #2A2A2A',
-              borderRadius: 12,
-              overflow: 'hidden',
-              transition: 'border-color 0.2s',
-            }}>
+            <div
+              key={slot.date}
+              ref={el => { rowRefs.current[slot.date] = el }}
+              style={{
+                background: '#1A1A1A',
+                border: expandedDate === slot.date ? '1px solid rgba(123,92,240,0.4)' : '1px solid #2A2A2A',
+                borderRadius: 12,
+                overflow: 'hidden',
+                transition: 'border-color 0.2s',
+              }}
+            >
               {/* Row header — click to expand/collapse */}
               <button
                 type="button"
