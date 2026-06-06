@@ -38,8 +38,11 @@ export default function BookingWidget({ item, currentUserId }: {
   const [error, setError] = useState('')
   const [dataLoaded, setDataLoaded] = useState(false)
   const [sheetOpen, setSheetOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
 
   const isOwner = currentUserId === item.owner_id
+
+  useEffect(() => { setMounted(true) }, [])
 
   useEffect(() => {
     const supabase = createClient()
@@ -101,6 +104,7 @@ export default function BookingWidget({ item, currentUserId }: {
 
   // Owner view — compact bar
   if (isOwner) {
+    if (!mounted) return null
     return (
       <div style={{
         position: 'fixed', bottom: 64, left: '50%', transform: 'translateX(-50%)',
@@ -122,7 +126,7 @@ export default function BookingWidget({ item, currentUserId }: {
     )
   }
 
-  if (!dataLoaded) return null
+  if (!dataLoaded || !mounted) return null
 
   const daysInMonth = getDaysInMonth(year, month)
   const firstDay = getFirstDayOfWeek(year, month)
