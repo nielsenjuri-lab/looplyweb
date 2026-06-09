@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import BookingActions from '@/components/BookingActions'
+import ReviewForm from '@/components/ReviewForm'
 import type { BookingStatus } from '@/lib/types'
 
 const STATUS_LABELS: Record<string, { label: string; color: string; bg: string }> = {
@@ -26,6 +27,8 @@ type BookingRow = {
   person: PersonInfo | null
   personLabel: string
   role: 'owner' | 'renter'
+  revieweeId: string | null
+  hasReview: boolean
 }
 
 type Props = {
@@ -83,6 +86,22 @@ function BookingCard({ booking }: { booking: BookingRow }) {
       </div>
 
       <BookingActions bookingId={booking.id} status={booking.status} role={booking.role} />
+
+      {booking.status === 'completed' && !booking.hasReview && booking.revieweeId && booking.person && (
+        <ReviewForm
+          bookingId={booking.id}
+          revieweeId={booking.revieweeId}
+          revieweeName={booking.person.name || 'пользователя'}
+        />
+      )}
+
+      {booking.status === 'completed' && booking.hasReview && (
+        <div style={{
+          padding: '8px 14px 14px', fontSize: 12, color: '#606060',
+        }}>
+          ✓ Вы оставили отзыв
+        </div>
+      )}
     </div>
   )
 }

@@ -60,6 +60,17 @@ export type BookingStatus =
   | 'completed'
   | 'cancelled'
 
+export type Review = {
+  id: string
+  booking_id: string
+  reviewer_id: string
+  reviewee_id: string
+  rating: number
+  comment: string | null
+  created_at: string
+  reviewer?: Pick<Profile, 'id' | 'name' | 'avatar_url'>
+}
+
 export const SPB_DISTRICTS = [
   'Адмиралтейский',
   'Василеостровский',

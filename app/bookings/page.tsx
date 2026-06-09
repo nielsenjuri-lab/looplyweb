@@ -15,7 +15,7 @@ export default async function BookingsPage({
 
   if (!user) redirect('/auth')
 
-  const [{ data: asRenter }, { data: asOwner }] = await Promise.all([
+  const [{ data: asRenter }, { data: asOwner }, { data: myReviews }] = await Promise.all([
     supabase
       .from('bookings')
       .select('*, item:items(id, title, image_urls, price_per_day), owner:profiles!owner_id(id, name, avatar_url, rating, review_count)')
@@ -26,7 +26,13 @@ export default async function BookingsPage({
       .select('*, item:items(id, title, image_urls, price_per_day), renter:profiles!renter_id(id, name, avatar_url, rating, review_count)')
       .eq('owner_id', user.id)
       .order('created_at', { ascending: false }),
+    supabase
+      .from('reviews')
+      .select('booking_id')
+      .eq('reviewer_id', user.id),
   ])
+
+  const reviewedBookingIds = new Set((myReviews || []).map(r => r.booking_id))
 
   const renterRows = (asRenter || []).map((b) => ({
     id: b.id,
@@ -38,6 +44,8 @@ export default async function BookingsPage({
     person: b.owner as { id: string; name: string; avatar_url: string | null; rating?: number; review_count?: number } | null,
     personLabel: 'Владелец',
     role: 'renter' as const,
+    revieweeId: b.owner_id as string,
+    hasReview: reviewedBookingIds.has(b.id),
   }))
 
   const ownerRows = (asOwner || []).map((b) => ({
@@ -50,6 +58,8 @@ export default async function BookingsPage({
     person: b.renter as { id: string; name: string; avatar_url: string | null; rating?: number; review_count?: number } | null,
     personLabel: 'Арендатор',
     role: 'owner' as const,
+    revieweeId: b.renter_id as string,
+    hasReview: reviewedBookingIds.has(b.id),
   }))
 
   const hasIncoming = ownerRows.some(b => b.status === 'pending')

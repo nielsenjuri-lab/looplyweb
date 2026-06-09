@@ -26,6 +26,13 @@ export default async function ProfilePage() {
     .eq('owner_id', user.id)
     .order('created_at', { ascending: false })
 
+  const { data: reviews } = await supabase
+    .from('reviews')
+    .select('id, rating, comment, created_at, reviewer:profiles!reviewer_id(id, name)')
+    .eq('reviewee_id', user.id)
+    .order('created_at', { ascending: false })
+    .limit(10)
+
   return (
     <div style={{ paddingBottom: 80 }}>
       <header style={{
@@ -87,7 +94,7 @@ export default async function ProfilePage() {
         }}>
           {[
             { label: 'Trust Score', value: profile?.trust_score ?? 50, emoji: '🛡️' },
-            { label: 'Рейтинг', value: profile?.rating ? Number(profile.rating).toFixed(1) : '—', emoji: '⭐' },
+            { label: 'Рейтинг', value: profile?.review_count ? Number(profile.rating).toFixed(1) : '—', emoji: '⭐' },
           ].map((stat) => (
             <div key={stat.label} style={{
               background: '#1A1A1A', borderRadius: 14,
@@ -99,6 +106,40 @@ export default async function ProfilePage() {
             </div>
           ))}
         </div>
+
+        {/* Reviews */}
+        {reviews && reviews.length > 0 && (
+          <div style={{ marginBottom: 24 }}>
+            <h2 style={{ color: '#fff', fontWeight: 600, fontSize: 16, marginBottom: 12 }}>
+              Отзывы ({profile?.review_count || reviews.length})
+            </h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {reviews.map((review) => {
+                const reviewer = review.reviewer as unknown as { id: string; name: string } | null
+                return (
+                  <div key={review.id} style={{
+                    background: '#1A1A1A', borderRadius: 12, padding: '12px 14px',
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                      <span style={{ color: '#fff', fontSize: 13, fontWeight: 500 }}>
+                        {reviewer?.name || 'Пользователь'}
+                      </span>
+                      <span style={{ color: '#FFB800', fontSize: 13 }}>
+                        {'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}
+                      </span>
+                    </div>
+                    {review.comment && (
+                      <p style={{ color: '#A0A0A0', fontSize: 13, lineHeight: 1.5 }}>{review.comment}</p>
+                    )}
+                    <p style={{ color: '#606060', fontSize: 11, marginTop: 6 }}>
+                      {new Date(review.created_at).toLocaleDateString('ru-RU')}
+                    </p>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
 
         {/* My listings */}
         <div style={{ marginBottom: 24 }}>
