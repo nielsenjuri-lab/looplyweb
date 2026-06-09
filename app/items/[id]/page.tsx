@@ -6,6 +6,7 @@ import BottomNav from '@/components/BottomNav'
 import BackButton from '@/components/BackButton'
 import BookingWidget from '@/components/BookingWidget'
 import RatingBadge from '@/components/RatingBadge'
+import { getOwnerRatings } from '@/lib/ratings'
 
 export default async function ItemPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -23,6 +24,12 @@ export default async function ItemPage({ params }: { params: Promise<{ id: strin
   if (!item) notFound()
 
   const typedItem = item as Item
+
+  const ownerRatings = await getOwnerRatings(supabase, [typedItem.owner_id])
+  const ownerStats = ownerRatings.get(typedItem.owner_id)
+  if (ownerStats && typedItem.owner) {
+    typedItem.owner = { ...typedItem.owner, ...ownerStats }
+  }
 
   const [{ data: availableSlots }, { data: bookings }] = await Promise.all([
     supabase.from('item_available_dates').select('date, time_from, time_to').eq('item_id', id),

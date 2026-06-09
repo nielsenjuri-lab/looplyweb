@@ -3,6 +3,7 @@ import type { Item } from '@/lib/types'
 import BottomNav from '@/components/BottomNav'
 import ItemCard from '@/components/ItemCard'
 import BackButton from '@/components/BackButton'
+import { getOwnerRatings, attachOwnerRatings } from '@/lib/ratings'
 
 export default async function SearchPage({
   searchParams,
@@ -22,7 +23,10 @@ export default async function SearchPage({
       .ilike('title', `%${q}%`)
       .limit(40)
 
-    items = (data as Item[]) || []
+    const raw = (data as Item[]) || []
+    const ownerIds = [...new Set(raw.map((i) => i.owner_id))]
+    const ratings = await getOwnerRatings(supabase, ownerIds)
+    items = attachOwnerRatings(raw, ratings)
   }
 
   return (

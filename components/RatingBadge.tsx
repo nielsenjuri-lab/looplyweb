@@ -5,7 +5,8 @@ type Props = {
 }
 
 export default function RatingBadge({ rating, reviewCount, size = 'sm' }: Props) {
-  if (!reviewCount || reviewCount < 1) return null
+  const count = Number(reviewCount)
+  if (!count || count < 1) return null
 
   const isMd = size === 'md'
 
@@ -23,7 +24,7 @@ export default function RatingBadge({ rating, reviewCount, size = 'sm' }: Props)
     }}>
       <span style={{ color: '#FFB800' }}>★</span>
       <span>{Number(rating).toFixed(1)}</span>
-      <span style={{ color: '#A0A0A0', fontWeight: 400 }}>({reviewCount})</span>
+      <span style={{ color: '#A0A0A0', fontWeight: 400 }}>({count})</span>
     </div>
   )
 }

@@ -6,6 +6,7 @@ import RatingBadge from '@/components/RatingBadge'
 import ReviewList from '@/components/ReviewList'
 import ItemCard from '@/components/ItemCard'
 import type { Item } from '@/lib/types'
+import { getOwnerRatings, attachOwnerRatings } from '@/lib/ratings'
 
 export default async function UserProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -19,7 +20,13 @@ export default async function UserProfilePage({ params }: { params: Promise<{ id
 
   if (!profile) notFound()
 
-  const [{ data: reviews }, { data: items }] = await Promise.all([
+  const ownerRatings = await getOwnerRatings(supabase, [id])
+  const profileStats = ownerRatings.get(id)
+  const displayProfile = profileStats
+    ? { ...profile, rating: profileStats.rating, review_count: profileStats.review_count }
+    : profile
+
+  const [{ data: reviews }, { data: rawItems }] = await Promise.all([
     supabase
       .from('reviews')
       .select('id, rating, comment, created_at, reviewer:profiles!reviewer_id(id, name)')
@@ -33,6 +40,8 @@ export default async function UserProfilePage({ params }: { params: Promise<{ id
       .order('created_at', { ascending: false })
       .limit(12),
   ])
+
+  const items = attachOwnerRatings((rawItems as Item[]) || [], ownerRatings)
 
   const reviewRows = (reviews || []).map((r) => ({
     ...r,
@@ -69,18 +78,18 @@ export default async function UserProfilePage({ params }: { params: Promise<{ id
           <div style={{ flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
               <p style={{ color: '#fff', fontWeight: 700, fontSize: 18 }}>
-                {profile.name || 'Пользователь'}
+                {displayProfile.name || 'Пользователь'}
               </p>
               {profile.is_verified && (
                 <span style={{ color: '#7B5CF0', fontSize: 12 }}>✓ Верифицирован</span>
               )}
             </div>
-            {profile.district && (
-              <p style={{ color: '#606060', fontSize: 13, marginTop: 4 }}>📍 {profile.district}</p>
+            {displayProfile.district && (
+              <p style={{ color: '#606060', fontSize: 13, marginTop: 4 }}>📍 {displayProfile.district}</p>
             )}
             <div style={{ marginTop: 8 }}>
-              {profile.review_count > 0 ? (
-                <RatingBadge rating={profile.rating} reviewCount={profile.review_count} size="md" />
+              {displayProfile.review_count > 0 ? (
+                <RatingBadge rating={displayProfile.rating} reviewCount={displayProfile.review_count} size="md" />
               ) : (
                 <span style={{ color: '#606060', fontSize: 13 }}>Новый пользователь</span>
               )}
@@ -90,7 +99,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{ id
 
         <div style={{ marginBottom: 24 }}>
           <h2 style={{ color: '#fff', fontWeight: 600, fontSize: 16, marginBottom: 12 }}>
-            Отзывы {profile.review_count > 0 && `(${profile.review_count})`}
+            Отзывы {displayProfile.review_count > 0 && `(${displayProfile.review_count})`}
           </h2>
           <ReviewList reviews={reviewRows} />
         </div>
@@ -103,7 +112,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{ id
             <div style={{
               display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12,
             }}>
-              {(items as Item[]).map((item) => (
+              {items.map((item) => (
                 <ItemCard key={item.id} item={item} />
               ))}
             </div>

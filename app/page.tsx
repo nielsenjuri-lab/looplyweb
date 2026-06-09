@@ -5,8 +5,9 @@ import BottomNav from '@/components/BottomNav'
 import ItemCard from '@/components/ItemCard'
 import CatalogFilters from '@/components/CatalogFilters'
 import Link from 'next/link'
+import { getOwnerRatings, attachOwnerRatings } from '@/lib/ratings'
 
-export const revalidate = 60
+export const revalidate = 0
 
 export default async function HomePage({
   searchParams,
@@ -30,7 +31,11 @@ export default async function HomePage({
     query = query.eq('district', params.district)
   }
 
-  const { data: items } = await query
+  const { data: rawItems } = await query
+  const itemsList = (rawItems as Item[]) || []
+  const ownerIds = [...new Set(itemsList.map((i) => i.owner_id))]
+  const ratings = await getOwnerRatings(supabase, ownerIds)
+  const items = attachOwnerRatings(itemsList, ratings)
 
   return (
     <div style={{ paddingBottom: 80 }}>
@@ -109,7 +114,7 @@ export default async function HomePage({
             gridTemplateColumns: '1fr 1fr',
             gap: 12,
           }}>
-            {(items as Item[]).map((item) => (
+            {items.map((item) => (
               <ItemCard key={item.id} item={item} />
             ))}
           </div>

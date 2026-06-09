@@ -28,6 +28,25 @@ create trigger on_review_created
   after insert on public.reviews
   for each row execute function public.update_profile_rating();
 
+-- Можно вызвать вручную из приложения после отзыва
+create or replace function public.recalculate_profile_rating(target_id uuid)
+returns void language plpgsql security definer as $$
+begin
+  update public.profiles
+  set
+    rating = coalesce((
+      select round(avg(rating)::numeric, 2)
+      from public.reviews where reviewee_id = target_id
+    ), 0),
+    review_count = (
+      select count(*)::int from public.reviews where reviewee_id = target_id
+    )
+  where id = target_id;
+end;
+$$;
+
+grant execute on function public.recalculate_profile_rating(uuid) to authenticated;
+
 -- Только после завершённой аренды, только участникам
 drop policy if exists "Автор создаёт отзыв" on public.reviews;
 create policy "Автор создаёт отзыв" on public.reviews

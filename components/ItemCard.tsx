@@ -6,8 +6,8 @@ import RatingBadge from '@/components/RatingBadge'
 
 export default function ItemCard({ item }: { item: Item }) {
   const image = item.image_urls?.[0]
-  const ownerRating = item.owner?.rating ?? 0
-  const ownerReviewCount = item.owner?.review_count ?? 0
+  const ownerRating = Number(item.owner?.rating ?? 0)
+  const ownerReviewCount = Number(item.owner?.review_count ?? 0)
 
   return (
     <Link href={`/items/${item.id}`} style={{ display: 'block' }}>

@@ -46,6 +46,9 @@ export default function ReviewForm({ bookingId, revieweeId, revieweeName }: Prop
       return
     }
 
+    // Sync profile rating (works even without DB trigger)
+    await supabase.rpc('recalculate_profile_rating', { target_id: revieweeId })
+
     setDone(true)
     router.refresh()
     setLoading(false)
