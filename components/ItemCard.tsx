@@ -2,9 +2,12 @@
 
 import Link from 'next/link'
 import type { Item } from '@/lib/types'
+import RatingBadge from '@/components/RatingBadge'
 
 export default function ItemCard({ item }: { item: Item }) {
   const image = item.image_urls?.[0]
+  const ownerRating = item.owner?.rating ?? 0
+  const ownerReviewCount = item.owner?.review_count ?? 0
 
   return (
     <Link href={`/items/${item.id}`} style={{ display: 'block' }}>
@@ -30,6 +33,13 @@ export default function ItemCard({ item }: { item: Item }) {
               fontSize: 36,
             }}>
               📦
+            </div>
+          )}
+
+          {/* Owner rating — top left like Airbnb */}
+          {ownerReviewCount > 0 && (
+            <div style={{ position: 'absolute', top: 8, left: 8 }}>
+              <RatingBadge rating={ownerRating} reviewCount={ownerReviewCount} />
             </div>
           )}
 
@@ -67,15 +77,6 @@ export default function ItemCard({ item }: { item: Item }) {
             <span style={{ fontSize: 15, fontWeight: 700, color: '#7B5CF0' }}>
               {item.price_per_day.toLocaleString('ru-RU')} ₽/день
             </span>
-
-            {item.review_count > 0 && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-                <span style={{ fontSize: 11, color: '#FFB800' }}>★</span>
-                <span style={{ fontSize: 12, color: '#A0A0A0' }}>
-                  {Number(item.rating).toFixed(1)}
-                </span>
-              </div>
-            )}
           </div>
         </div>
       </div>

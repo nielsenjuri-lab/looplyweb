@@ -17,7 +17,7 @@ export default async function SearchPage({
   if (q && q.trim().length > 0) {
     const { data } = await supabase
       .from('items')
-      .select('*, owner:profiles(id, name, avatar_url, rating, is_verified)')
+      .select('*, owner:profiles(id, name, avatar_url, rating, review_count, is_verified)')
       .eq('status', 'published')
       .ilike('title', `%${q}%`)
       .limit(40)

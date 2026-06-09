@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import BottomNav from '@/components/BottomNav'
 import SignOutButton from '@/components/SignOutButton'
+import RatingBadge from '@/components/RatingBadge'
+import ReviewList from '@/components/ReviewList'
 import Link from 'next/link'
 
 const ADMIN_USER_ID = 'fabb7245-b2f7-47bb-a0a7-aee2651388f5'
@@ -31,7 +33,6 @@ export default async function ProfilePage() {
     .select('id, rating, comment, created_at, reviewer:profiles!reviewer_id(id, name)')
     .eq('reviewee_id', user.id)
     .order('created_at', { ascending: false })
-    .limit(10)
 
   return (
     <div style={{ paddingBottom: 80 }}>
@@ -65,6 +66,13 @@ export default async function ProfilePage() {
             {profile?.district && (
               <p style={{ color: '#606060', fontSize: 12, marginTop: 2 }}>📍 {profile.district}</p>
             )}
+            <div style={{ marginTop: 8 }}>
+              {profile?.review_count ? (
+                <RatingBadge rating={profile.rating} reviewCount={profile.review_count} size="md" />
+              ) : (
+                <span style={{ color: '#606060', fontSize: 13 }}>Пока нет отзывов</span>
+              )}
+            </div>
           </div>
         </div>
 
@@ -108,38 +116,15 @@ export default async function ProfilePage() {
         </div>
 
         {/* Reviews */}
-        {reviews && reviews.length > 0 && (
-          <div style={{ marginBottom: 24 }}>
-            <h2 style={{ color: '#fff', fontWeight: 600, fontSize: 16, marginBottom: 12 }}>
-              Отзывы ({profile?.review_count || reviews.length})
-            </h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {reviews.map((review) => {
-                const reviewer = review.reviewer as unknown as { id: string; name: string } | null
-                return (
-                  <div key={review.id} style={{
-                    background: '#1A1A1A', borderRadius: 12, padding: '12px 14px',
-                  }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                      <span style={{ color: '#fff', fontSize: 13, fontWeight: 500 }}>
-                        {reviewer?.name || 'Пользователь'}
-                      </span>
-                      <span style={{ color: '#FFB800', fontSize: 13 }}>
-                        {'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}
-                      </span>
-                    </div>
-                    {review.comment && (
-                      <p style={{ color: '#A0A0A0', fontSize: 13, lineHeight: 1.5 }}>{review.comment}</p>
-                    )}
-                    <p style={{ color: '#606060', fontSize: 11, marginTop: 6 }}>
-                      {new Date(review.created_at).toLocaleDateString('ru-RU')}
-                    </p>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-        )}
+        <div style={{ marginBottom: 24 }}>
+          <h2 style={{ color: '#fff', fontWeight: 600, fontSize: 16, marginBottom: 12 }}>
+            Отзывы {profile?.review_count ? `(${profile.review_count})` : ''}
+          </h2>
+          <ReviewList reviews={(reviews || []).map((r) => ({
+            ...r,
+            reviewer: r.reviewer as unknown as { id: string; name: string } | null,
+          }))} />
+        </div>
 
         {/* My listings */}
         <div style={{ marginBottom: 24 }}>

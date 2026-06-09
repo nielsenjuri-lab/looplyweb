@@ -1,9 +1,11 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import type { Item } from '@/lib/types'
+import Link from 'next/link'
 import BottomNav from '@/components/BottomNav'
 import BackButton from '@/components/BackButton'
 import BookingWidget from '@/components/BookingWidget'
+import RatingBadge from '@/components/RatingBadge'
 
 export default async function ItemPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -62,9 +64,20 @@ export default async function ItemPage({ params }: { params: Promise<{ id: strin
         </div>
 
         {/* Back button */}
-        <div style={{ position: 'absolute', top: 16, left: 16 }}>
+        <div style={{ position: 'absolute', top: 16, left: 16, zIndex: 2 }}>
           <BackButton />
         </div>
+
+        {/* Owner rating on photo */}
+        {typedItem.owner && typedItem.owner.review_count > 0 && (
+          <div style={{ position: 'absolute', top: 16, right: 16, zIndex: 2 }}>
+            <RatingBadge
+              rating={typedItem.owner.rating}
+              reviewCount={typedItem.owner.review_count}
+              size="md"
+            />
+          </div>
+        )}
 
         {/* Image count */}
         {typedItem.image_urls?.length > 1 && (
@@ -85,13 +98,6 @@ export default async function ItemPage({ params }: { params: Promise<{ id: strin
             <h1 style={{ fontSize: 20, fontWeight: 700, color: '#fff', lineHeight: 1.3, flex: 1 }}>
               {typedItem.title}
             </h1>
-            {typedItem.review_count > 0 && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
-                <span style={{ color: '#FFB800' }}>★</span>
-                <span style={{ color: '#fff', fontWeight: 600 }}>{Number(typedItem.rating).toFixed(1)}</span>
-                <span style={{ color: '#606060', fontSize: 12 }}>({typedItem.review_count})</span>
-              </div>
-            )}
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }}>
@@ -167,7 +173,7 @@ export default async function ItemPage({ params }: { params: Promise<{ id: strin
 
         {/* Owner */}
         {typedItem.owner && (
-          <div style={{
+          <Link href={`/users/${typedItem.owner.id}`} style={{
             background: '#1A1A1A',
             borderRadius: 14,
             padding: '14px 16px',
@@ -195,16 +201,19 @@ export default async function ItemPage({ params }: { params: Promise<{ id: strin
                   <span style={{ color: '#7B5CF0', fontSize: 12 }}>✓ Верифицирован</span>
                 )}
               </div>
-              {typedItem.owner.review_count > 0 && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
-                  <span style={{ color: '#FFB800', fontSize: 12 }}>★</span>
-                  <span style={{ color: '#A0A0A0', fontSize: 12 }}>
-                    {Number(typedItem.owner.rating).toFixed(1)} · {typedItem.owner.review_count} отзывов
-                  </span>
+              {typedItem.owner.review_count > 0 ? (
+                <div style={{ marginTop: 4 }}>
+                  <RatingBadge
+                    rating={typedItem.owner.rating}
+                    reviewCount={typedItem.owner.review_count}
+                  />
                 </div>
+              ) : (
+                <p style={{ color: '#606060', fontSize: 12, marginTop: 2 }}>Новый пользователь</p>
               )}
             </div>
-          </div>
+            <span style={{ color: '#606060', fontSize: 18 }}>›</span>
+          </Link>
         )}
       </div>
 

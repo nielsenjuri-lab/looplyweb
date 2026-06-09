@@ -18,7 +18,7 @@ export default async function HomePage({
 
   let query = supabase
     .from('items')
-    .select('*, owner:profiles(id, name, avatar_url, rating, is_verified)')
+    .select('*, owner:profiles(id, name, avatar_url, rating, review_count, is_verified)')
     .eq('status', 'published')
     .order('created_at', { ascending: false })
     .limit(40)
