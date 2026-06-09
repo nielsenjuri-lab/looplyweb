@@ -13,6 +13,7 @@
   --border: #2A2A2A;
   --error: #FF4D4D;
   --success: #4CAF50;
+  --bottom-nav-height: calc(64px + env(safe-area-inset-bottom, 0px));
 }
 
 * {
@@ -34,6 +35,22 @@ body {
   max-width: 480px;
   margin: 0 auto;
   position: relative;
+}
+
+.booking-bar-inline {
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+  padding: 14px 16px calc(14px + var(--bottom-nav-height));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.booking-bar-owner {
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+  padding: 14px 16px calc(14px + var(--bottom-nav-height));
 }
 
 /* Scrollbar */

@@ -14,7 +14,8 @@ export default function CreatePage() {
   const [photos, setPhotos] = useState<File[]>([])
   const [previews, setPreviews] = useState<string[]>([])
   const [availableSlots, setAvailableSlots] = useState<AvailableSlot[]>([])
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const cameraInputRef = useRef<HTMLInputElement>(null)
+  const galleryInputRef = useRef<HTMLInputElement>(null)
 
   const [form, setForm] = useState({
     title: '',
@@ -33,9 +34,16 @@ export default function CreatePage() {
   }
 
   function handlePhotos(e: React.ChangeEvent<HTMLInputElement>) {
-    const files = Array.from(e.target.files || []).slice(0, 5)
-    setPhotos(files)
-    setPreviews(files.map((f) => URL.createObjectURL(f)))
+    const incoming = Array.from(e.target.files || [])
+    if (!incoming.length) return
+
+    const remaining = 5 - photos.length
+    const toAdd = incoming.slice(0, remaining)
+    if (!toAdd.length) return
+
+    setPhotos((prev) => [...prev, ...toAdd])
+    setPreviews((prev) => [...prev, ...toAdd.map((f) => URL.createObjectURL(f))])
+    e.target.value = ''
   }
 
   function removePhoto(i: number) {
@@ -140,27 +148,57 @@ export default function CreatePage() {
               </div>
             ))}
 
-            {/* Add button */}
-            {photos.length < 5 && (
+          </div>
+
+          {photos.length < 5 && (
+            <div style={{ display: 'flex', gap: 10, marginTop: 10 }}>
               <button
                 type="button"
-                onClick={() => fileInputRef.current?.click()}
+                onClick={() => cameraInputRef.current?.click()}
                 style={{
-                  width: 80, height: 80, borderRadius: 12,
-                  border: '2px dashed #2A2A2A',
-                  background: '#1A1A1A',
-                  display: 'flex', flexDirection: 'column',
-                  alignItems: 'center', justifyContent: 'center',
-                  gap: 4, color: '#606060', fontSize: 11,
+                  flex: 1, borderRadius: 12, padding: '12px 14px',
+                  border: '1px solid rgba(123,92,240,0.3)',
+                  background: 'rgba(123,92,240,0.1)',
+                  color: '#7B5CF0', fontSize: 13, fontWeight: 600,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                 }}
               >
-                <span style={{ fontSize: 24 }}>+</span>
-                <span>Фото</span>
+                <span>📷</span>
+                <span>Сделать фото</span>
               </button>
-            )}
-          </div>
+              <button
+                type="button"
+                onClick={() => galleryInputRef.current?.click()}
+                style={{
+                  flex: 1, borderRadius: 12, padding: '12px 14px',
+                  border: '1px solid #2A2A2A',
+                  background: '#1A1A1A',
+                  color: '#A0A0A0', fontSize: 13, fontWeight: 600,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                }}
+              >
+                <span>🖼️</span>
+                <span>Из галереи</span>
+              </button>
+            </div>
+          )}
+
+          {photos.length > 0 && (
+            <p style={{ color: '#606060', fontSize: 12, marginTop: 8 }}>
+              {photos.length} из 5 фото
+            </p>
+          )}
+
           <input
-            ref={fileInputRef}
+            ref={cameraInputRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            onChange={handlePhotos}
+            style={{ display: 'none' }}
+          />
+          <input
+            ref={galleryInputRef}
             type="file"
             accept="image/*"
             multiple

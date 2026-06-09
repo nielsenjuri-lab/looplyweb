@@ -1,15 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import BottomNav from '@/components/BottomNav'
-import Link from 'next/link'
-
-const STATUS_LABELS: Record<string, { label: string; color: string; bg: string }> = {
-  pending:   { label: 'Ожидает',    color: '#FFB700', bg: 'rgba(255,183,0,0.12)' },
-  confirmed: { label: 'Подтверждено', color: '#5B8AF0', bg: 'rgba(91,138,240,0.12)' },
-  active:    { label: 'Активна',    color: '#4CAF50', bg: 'rgba(76,175,80,0.12)' },
-  completed: { label: 'Завершена',  color: '#606060', bg: 'rgba(96,96,96,0.12)' },
-  cancelled: { label: 'Отменена',   color: '#FF4D4D', bg: 'rgba(255,77,77,0.12)' },
-}
+import BookingsTabs from '@/components/BookingsTabs'
+import type { BookingStatus } from '@/lib/types'
 
 export default async function BookingsPage({
   searchParams,
@@ -22,16 +15,52 @@ export default async function BookingsPage({
 
   if (!user) redirect('/auth')
 
-  const { data: bookings } = await supabase
-    .from('bookings')
-    .select('*, item:items(id, title, image_urls, price_per_day)')
-    .eq('renter_id', user.id)
-    .order('created_at', { ascending: false })
+  const [{ data: asRenter }, { data: asOwner }] = await Promise.all([
+    supabase
+      .from('bookings')
+      .select('*, item:items(id, title, image_urls, price_per_day), owner:profiles!owner_id(id, name, avatar_url, rating, review_count)')
+      .eq('renter_id', user.id)
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('bookings')
+      .select('*, item:items(id, title, image_urls, price_per_day), renter:profiles!renter_id(id, name, avatar_url, rating, review_count)')
+      .eq('owner_id', user.id)
+      .order('created_at', { ascending: false }),
+  ])
+
+  const renterRows = (asRenter || []).map((b) => ({
+    id: b.id,
+    status: b.status as BookingStatus,
+    start_date: b.start_date,
+    end_date: b.end_date,
+    total_amount: b.total_amount,
+    item: b.item as { id: string; title: string; image_urls: string[]; price_per_day: number } | null,
+    person: b.owner as { id: string; name: string; avatar_url: string | null; rating?: number; review_count?: number } | null,
+    personLabel: 'Владелец',
+    role: 'renter' as const,
+  }))
+
+  const ownerRows = (asOwner || []).map((b) => ({
+    id: b.id,
+    status: b.status as BookingStatus,
+    start_date: b.start_date,
+    end_date: b.end_date,
+    total_amount: b.total_amount,
+    item: b.item as { id: string; title: string; image_urls: string[]; price_per_day: number } | null,
+    person: b.renter as { id: string; name: string; avatar_url: string | null; rating?: number; review_count?: number } | null,
+    personLabel: 'Арендатор',
+    role: 'owner' as const,
+  }))
+
+  const hasIncoming = ownerRows.some(b => b.status === 'pending')
 
   return (
     <div style={{ paddingBottom: 80 }}>
       <header style={{ padding: '20px 16px 16px', borderBottom: '1px solid #1A1A1A' }}>
-        <h1 style={{ fontSize: 20, fontWeight: 700, color: '#fff' }}>Мои аренды</h1>
+        <h1 style={{ fontSize: 20, fontWeight: 700, color: '#fff' }}>Аренды</h1>
+        <p style={{ color: '#606060', fontSize: 13, marginTop: 4 }}>
+          Ваши заявки и запросы на ваши вещи
+        </p>
       </header>
 
       {success && (
@@ -50,60 +79,11 @@ export default async function BookingsPage({
         </div>
       )}
 
-      <div style={{ padding: '16px' }}>
-        {!bookings || bookings.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '60px 0' }}>
-            <p style={{ fontSize: 40, marginBottom: 12 }}>📅</p>
-            <p style={{ color: '#fff', fontWeight: 600, marginBottom: 6 }}>Нет аренд</p>
-            <p style={{ color: '#606060', fontSize: 14 }}>Найдите что-нибудь в каталоге</p>
-            <Link href="/" className="btn-primary" style={{ marginTop: 20, width: 'auto', padding: '12px 24px', display: 'inline-flex' }}>
-              Открыть каталог
-            </Link>
-          </div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {bookings.map((booking) => {
-              const status = STATUS_LABELS[booking.status] || STATUS_LABELS.pending
-              const item = booking.item as { id: string; title: string; image_urls: string[]; price_per_day: number }
-              return (
-                <div key={booking.id} style={{
-                  background: '#1A1A1A', borderRadius: 16, overflow: 'hidden',
-                }}>
-                  <div style={{ display: 'flex', gap: 12, padding: '14px' }}>
-                    <div style={{
-                      width: 64, height: 64, borderRadius: 12,
-                      background: '#222', overflow: 'hidden', flexShrink: 0,
-                    }}>
-                      {item?.image_urls?.[0] ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={item.image_urls[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      ) : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24 }}>📦</div>}
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <p style={{ color: '#fff', fontWeight: 500, fontSize: 14, marginBottom: 4 }}>
-                        {item?.title || 'Объявление'}
-                      </p>
-                      <p style={{ color: '#606060', fontSize: 12 }}>
-                        {new Date(booking.start_date).toLocaleDateString('ru-RU')} —{' '}
-                        {new Date(booking.end_date).toLocaleDateString('ru-RU')}
-                      </p>
-                      <p style={{ color: '#7B5CF0', fontSize: 13, fontWeight: 600, marginTop: 4 }}>
-                        {booking.total_amount.toLocaleString('ru-RU')} ₽
-                      </p>
-                    </div>
-                    <div style={{
-                      padding: '4px 10px', borderRadius: 20, height: 'fit-content',
-                      background: status.bg, color: status.color, fontSize: 11, fontWeight: 600,
-                    }}>
-                      {status.label}
-                    </div>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        )}
-      </div>
+      <BookingsTabs
+        asRenter={renterRows}
+        asOwner={ownerRows}
+        initialTab={hasIncoming ? 'owner' : 'renter'}
+      />
 
       <BottomNav />
     </div>

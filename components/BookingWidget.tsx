@@ -88,12 +88,7 @@ export default function BookingWidget({ item, currentUserId, initialSlots, initi
   if (isOwner) {
     if (!mounted) return null
     return (
-      <div style={{
-        position: 'fixed', bottom: 64, left: '50%', transform: 'translateX(-50%)',
-        width: '100%', maxWidth: 480,
-        background: 'rgba(13,13,13,0.97)', backdropFilter: 'blur(20px)',
-        borderTop: '1px solid #2A2A2A', padding: '12px 16px', zIndex: 90,
-      }}>
+      <div className="booking-bar-owner">
         <div style={{
           background: 'rgba(123,92,240,0.1)', border: '1px solid rgba(123,92,240,0.2)',
           borderRadius: 12, padding: '10px 14px', marginBottom: 10,
@@ -132,7 +127,7 @@ export default function BookingWidget({ item, currentUserId, initialSlots, initi
       {/* Bottom sheet with calendar */}
       <div style={{
         position: 'fixed',
-        bottom: sheetOpen ? 64 : -600,
+        bottom: sheetOpen ? 'var(--bottom-nav-height)' : -600,
         left: '50%', transform: 'translateX(-50%)',
         width: '100%', maxWidth: 480,
         background: '#111',
@@ -246,16 +241,8 @@ export default function BookingWidget({ item, currentUserId, initialSlots, initi
         </button>
       </div>
 
-      {/* Compact sticky bar (always visible) */}
-      <div style={{
-        position: 'fixed', bottom: 64, left: '50%', transform: 'translateX(-50%)',
-        width: '100%', maxWidth: 480,
-        background: 'rgba(13,13,13,0.97)', backdropFilter: 'blur(20px)',
-        borderTop: '1px solid #2A2A2A',
-        padding: '12px 16px',
-        zIndex: 90,
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
-      }}>
+      {/* Booking bar — в потоке страницы, не перекрывает контент */}
+      <div className="booking-bar-inline">
         <div>
           <div style={{ color: '#fff', fontWeight: 700, fontSize: 18 }}>
             {item.price_per_day.toLocaleString('ru-RU')} ₽

@@ -1,0 +1,168 @@
+'use client'
+
+import { useState } from 'react'
+import Link from 'next/link'
+import BookingActions from '@/components/BookingActions'
+import type { BookingStatus } from '@/lib/types'
+
+const STATUS_LABELS: Record<string, { label: string; color: string; bg: string }> = {
+  pending:   { label: 'Ожидает',      color: '#FFB700', bg: 'rgba(255,183,0,0.12)' },
+  confirmed: { label: 'Подтверждено', color: '#5B8AF0', bg: 'rgba(91,138,240,0.12)' },
+  active:    { label: 'Активна',      color: '#4CAF50', bg: 'rgba(76,175,80,0.12)' },
+  completed: { label: 'Завершена',    color: '#606060', bg: 'rgba(96,96,96,0.12)' },
+  cancelled: { label: 'Отменена',     color: '#FF4D4D', bg: 'rgba(255,77,77,0.12)' },
+}
+
+type ItemInfo = { id: string; title: string; image_urls: string[]; price_per_day: number }
+type PersonInfo = { id: string; name: string; avatar_url: string | null; rating?: number; review_count?: number }
+
+type BookingRow = {
+  id: string
+  status: BookingStatus
+  start_date: string
+  end_date: string
+  total_amount: number
+  item: ItemInfo | null
+  person: PersonInfo | null
+  personLabel: string
+  role: 'owner' | 'renter'
+}
+
+type Props = {
+  asRenter: BookingRow[]
+  asOwner: BookingRow[]
+  initialTab?: 'renter' | 'owner'
+}
+
+function BookingCard({ booking }: { booking: BookingRow }) {
+  const status = STATUS_LABELS[booking.status] || STATUS_LABELS.pending
+  const item = booking.item
+  const isSingleDay = booking.start_date === booking.end_date
+
+  return (
+    <div style={{ background: '#1A1A1A', borderRadius: 16, overflow: 'hidden' }}>
+      <div style={{ display: 'flex', gap: 12, padding: '14px' }}>
+        <Link href={item ? `/items/${item.id}` : '#'} style={{ flexShrink: 0 }}>
+          <div style={{
+            width: 64, height: 64, borderRadius: 12,
+            background: '#222', overflow: 'hidden',
+          }}>
+            {item?.image_urls?.[0] ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={item.image_urls[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            ) : (
+              <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24 }}>📦</div>
+            )}
+          </div>
+        </Link>
+
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <p style={{ color: '#fff', fontWeight: 500, fontSize: 14, marginBottom: 4 }}>
+            {item?.title || 'Объявление'}
+          </p>
+          <p style={{ color: '#606060', fontSize: 12 }}>
+            {isSingleDay
+              ? new Date(booking.start_date + 'T12:00:00').toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })
+              : `${new Date(booking.start_date + 'T12:00:00').toLocaleDateString('ru-RU')} — ${new Date(booking.end_date + 'T12:00:00').toLocaleDateString('ru-RU')}`}
+          </p>
+          <p style={{ color: '#A0A0A0', fontSize: 12, marginTop: 4 }}>
+            {booking.personLabel}: {booking.person?.name || 'Пользователь'}
+            {booking.person?.review_count ? ` · ★ ${Number(booking.person.rating).toFixed(1)}` : ''}
+          </p>
+          <p style={{ color: '#7B5CF0', fontSize: 13, fontWeight: 600, marginTop: 4 }}>
+            {booking.total_amount.toLocaleString('ru-RU')} ₽
+          </p>
+        </div>
+
+        <div style={{
+          padding: '4px 10px', borderRadius: 20, height: 'fit-content', flexShrink: 0,
+          background: status.bg, color: status.color, fontSize: 11, fontWeight: 600,
+        }}>
+          {status.label}
+        </div>
+      </div>
+
+      <BookingActions bookingId={booking.id} status={booking.status} role={booking.role} />
+    </div>
+  )
+}
+
+export default function BookingsTabs({ asRenter, asOwner, initialTab }: Props) {
+  const pendingIncoming = asOwner.filter(b => b.status === 'pending').length
+  const [tab, setTab] = useState<'renter' | 'owner'>(initialTab || 'renter')
+  const list = tab === 'renter' ? asRenter : asOwner
+
+  return (
+    <>
+      <div style={{
+        display: 'flex', gap: 8, padding: '12px 16px 0',
+        borderBottom: '1px solid #1A1A1A',
+      }}>
+        <button
+          type="button"
+          onClick={() => setTab('renter')}
+          style={{
+            flex: 1, padding: '10px 0', border: 'none', background: 'transparent',
+            color: tab === 'renter' ? '#fff' : '#606060',
+            fontWeight: tab === 'renter' ? 600 : 400, fontSize: 14,
+            borderBottom: tab === 'renter' ? '2px solid #7B5CF0' : '2px solid transparent',
+            cursor: 'pointer',
+          }}
+        >
+          Я арендую
+        </button>
+        <button
+          type="button"
+          onClick={() => setTab('owner')}
+          style={{
+            flex: 1, padding: '10px 0', border: 'none', background: 'transparent',
+            color: tab === 'owner' ? '#fff' : '#606060',
+            fontWeight: tab === 'owner' ? 600 : 400, fontSize: 14,
+            borderBottom: tab === 'owner' ? '2px solid #7B5CF0' : '2px solid transparent',
+            cursor: 'pointer',
+            position: 'relative',
+          }}
+        >
+          Мне арендуют
+          {pendingIncoming > 0 && (
+            <span style={{
+              position: 'absolute', top: 4, right: '20%',
+              background: '#FF4D4D', color: '#fff',
+              fontSize: 10, fontWeight: 700,
+              borderRadius: 10, padding: '1px 6px', minWidth: 18,
+            }}>
+              {pendingIncoming}
+            </span>
+          )}
+        </button>
+      </div>
+
+      <div style={{ padding: '16px' }}>
+        {list.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '60px 0' }}>
+            <p style={{ fontSize: 40, marginBottom: 12 }}>{tab === 'renter' ? '📅' : '📬'}</p>
+            <p style={{ color: '#fff', fontWeight: 600, marginBottom: 6 }}>
+              {tab === 'renter' ? 'Нет аренд' : 'Нет заявок'}
+            </p>
+            <p style={{ color: '#606060', fontSize: 14 }}>
+              {tab === 'renter'
+                ? 'Найдите что-нибудь в каталоге'
+                : 'Когда кто-то захочет взять вашу вещь — заявка появится здесь'}
+            </p>
+            {tab === 'renter' && (
+              <Link href="/" className="btn-primary" style={{ marginTop: 20, width: 'auto', padding: '12px 24px', display: 'inline-flex' }}>
+                Открыть каталог
+              </Link>
+            )}
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {list.map((booking) => (
+              <BookingCard key={booking.id} booking={booking} />
+            ))}
+          </div>
+        )}
+      </div>
+    </>
+  )
+}

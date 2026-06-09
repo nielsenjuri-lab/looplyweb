@@ -38,7 +38,7 @@ export default async function ItemPage({ params }: { params: Promise<{ id: strin
   })
 
   return (
-    <div style={{ paddingBottom: 100 }}>
+    <div>
       {/* Images */}
       <div style={{ position: 'relative' }}>
         <div style={{
@@ -108,6 +108,19 @@ export default async function ItemPage({ params }: { params: Promise<{ id: strin
             <span style={{ color: '#606060', fontSize: 13 }}>{typedItem.district}</span>
           </div>
         </div>
+
+        {/* Pickup note — вверху, чтобы было видно на телефоне */}
+        {typedItem.pickup_note && (
+          <div style={{ marginBottom: 16 }}>
+            <div style={{ background: '#1A1A1A', borderRadius: 12, padding: '12px 14px', display: 'flex', gap: 10 }}>
+              <span>📍</span>
+              <div>
+                <p style={{ color: '#fff', fontSize: 13, fontWeight: 500, marginBottom: 2 }}>Самовывоз</p>
+                <p style={{ color: '#A0A0A0', fontSize: 13, lineHeight: 1.5 }}>{typedItem.pickup_note}</p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Deposit */}
         {typedItem.deposit && (
@@ -195,20 +208,7 @@ export default async function ItemPage({ params }: { params: Promise<{ id: strin
         )}
       </div>
 
-      {/* Pickup note */}
-      {typedItem.pickup_note && (
-        <div style={{ padding: '0 16px 16px' }}>
-          <div style={{ background: '#1A1A1A', borderRadius: 12, padding: '12px 14px', display: 'flex', gap: 10 }}>
-            <span>📍</span>
-            <div>
-              <p style={{ color: '#fff', fontSize: 13, fontWeight: 500, marginBottom: 2 }}>Самовывоз</p>
-              <p style={{ color: '#A0A0A0', fontSize: 13, lineHeight: 1.5 }}>{typedItem.pickup_note}</p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Booking widget */}
+      {/* Booking bar внизу страницы — не перекрывает контент */}
       <BookingWidget
         item={typedItem}
         currentUserId={user?.id ?? null}
