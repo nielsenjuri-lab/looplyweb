@@ -22,6 +22,20 @@ export default async function ItemPage({ params }: { params: Promise<{ id: strin
 
   const typedItem = item as Item
 
+  const [{ data: availableSlots }, { data: bookings }] = await Promise.all([
+    supabase.from('item_available_dates').select('date, time_from, time_to').eq('item_id', id),
+    supabase.from('bookings').select('start_date, end_date').eq('item_id', id).in('status', ['confirmed', 'active', 'pending']),
+  ])
+
+  const bookedDates: string[] = []
+  ;(bookings || []).forEach(({ start_date, end_date }) => {
+    const cur = new Date(start_date)
+    const end = new Date(end_date)
+    while (cur <= end) {
+      bookedDates.push(cur.toISOString().split('T')[0])
+      cur.setDate(cur.getDate() + 1)
+    }
+  })
 
   return (
     <div style={{ paddingBottom: 100 }}>
@@ -195,7 +209,12 @@ export default async function ItemPage({ params }: { params: Promise<{ id: strin
       )}
 
       {/* Booking widget */}
-      <BookingWidget item={typedItem} currentUserId={user?.id ?? null} />
+      <BookingWidget
+        item={typedItem}
+        currentUserId={user?.id ?? null}
+        initialSlots={availableSlots || []}
+        initialBookedDates={bookedDates}
+      />
       <BottomNav />
     </div>
   )

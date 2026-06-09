@@ -21,9 +21,11 @@ function formatDate(year: number, month: number, day: number) {
   return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
 }
 
-export default function BookingWidget({ item, currentUserId }: {
+export default function BookingWidget({ item, currentUserId, initialSlots, initialBookedDates }: {
   item: Item
   currentUserId: string | null
+  initialSlots: AvailableSlot[]
+  initialBookedDates: string[]
 }) {
   const router = useRouter()
   const today = new Date()
@@ -31,38 +33,17 @@ export default function BookingWidget({ item, currentUserId }: {
 
   const [year, setYear] = useState(today.getFullYear())
   const [month, setMonth] = useState(today.getMonth())
-  const [availableSlots, setAvailableSlots] = useState<AvailableSlot[]>([])
-  const [bookedDates, setBookedDates] = useState<string[]>([])
+  const availableSlots = initialSlots
+  const bookedDates = initialBookedDates
   const [selectedDate, setSelectedDate] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [dataLoaded, setDataLoaded] = useState(false)
   const [sheetOpen, setSheetOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
 
   const isOwner = currentUserId === item.owner_id
 
   useEffect(() => { setMounted(true) }, [])
-
-  useEffect(() => {
-    const supabase = createClient()
-    Promise.all([
-      supabase.from('item_available_dates').select('date, time_from, time_to').eq('item_id', item.id),
-      supabase.from('bookings').select('start_date, end_date').eq('item_id', item.id).in('status', ['confirmed', 'active', 'pending'])
-    ]).then(([{ data: slots }, { data: bookings }]) => {
-      setAvailableSlots(slots || [])
-      const dates: string[] = []
-      ;(bookings || []).forEach(({ start_date, end_date }) => {
-        const cur = new Date(start_date)
-        while (cur <= new Date(end_date)) {
-          dates.push(cur.toISOString().split('T')[0])
-          cur.setDate(cur.getDate() + 1)
-        }
-      })
-      setBookedDates(dates)
-      setDataLoaded(true)
-    })
-  }, [item.id])
 
   const slotMap = new Map(availableSlots.map(s => [s.date, s]))
   const hasAvailability = availableSlots.length > 0
@@ -96,7 +77,8 @@ export default function BookingWidget({ item, currentUserId }: {
       if (error) throw error
       router.push('/bookings?success=1')
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Ошибка')
+      const msg = e instanceof Error ? e.message : 'Ошибка'
+      setError(msg === 'Failed to fetch' ? 'Нет связи с сервером. Проверьте интернет и попробуйте снова.' : msg)
     } finally {
       setLoading(false)
     }
@@ -126,7 +108,7 @@ export default function BookingWidget({ item, currentUserId }: {
     )
   }
 
-  if (!dataLoaded || !mounted) return null
+  if (!mounted) return null
 
   const daysInMonth = getDaysInMonth(year, month)
   const firstDay = getFirstDayOfWeek(year, month)
