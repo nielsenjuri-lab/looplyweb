@@ -21,6 +21,35 @@ function formatDate(year: number, month: number, day: number) {
   return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
 }
 
+const MAX_RENT_DAYS = 7
+
+function getDatesInRange(start: string, end: string): string[] {
+  const [sy, sm, sd] = start.split('-').map(Number)
+  const [ey, em, ed] = end.split('-').map(Number)
+  const cur = new Date(sy, sm - 1, sd)
+  const last = new Date(ey, em - 1, ed)
+  const dates: string[] = []
+  while (cur <= last) {
+    dates.push(formatDate(cur.getFullYear(), cur.getMonth(), cur.getDate()))
+    cur.setDate(cur.getDate() + 1)
+  }
+  return dates
+}
+
+function formatRangeLabel(start: string, end: string) {
+  const s = new Date(start + 'T12:00:00')
+  const e = new Date(end + 'T12:00:00')
+  const days = getDatesInRange(start, end).length
+  if (start === end) {
+    return s.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })
+  }
+  const sameMonth = s.getMonth() === e.getMonth() && s.getFullYear() === e.getFullYear()
+  const range = sameMonth
+    ? `${s.getDate()} — ${e.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })}`
+    : `${s.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })} — ${e.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}`
+  return `${range} (${days} ${days === 1 ? 'день' : days < 5 ? 'дня' : 'дней'})`
+}
+
 export default function BookingWidget({ item, currentUserId, initialSlots, initialBookedDates }: {
   item: Item
   currentUserId: string | null
@@ -35,7 +64,8 @@ export default function BookingWidget({ item, currentUserId, initialSlots, initi
   const [month, setMonth] = useState(today.getMonth())
   const availableSlots = initialSlots
   const bookedDates = initialBookedDates
-  const [selectedDate, setSelectedDate] = useState('')
+  const [rangeStart, setRangeStart] = useState('')
+  const [rangeEnd, setRangeEnd] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [sheetOpen, setSheetOpen] = useState(false)
@@ -55,11 +85,50 @@ export default function BookingWidget({ item, currentUserId, initialSlots, initi
     return true
   }
 
-  const selectedSlot = selectedDate ? slotMap.get(selectedDate) : undefined
+  const effectiveEnd = rangeEnd || rangeStart
+  const dayCount = rangeStart ? getDatesInRange(rangeStart, effectiveEnd).length : 0
+  const totalPrice = dayCount * item.price_per_day
+  const selectedSlot = rangeStart ? slotMap.get(rangeStart) : undefined
+  const rangeComplete = !!rangeStart
+
+  function handleDateClick(dateStr: string) {
+    if (!isAvailable(dateStr)) return
+    setError('')
+
+    if (!rangeStart || (rangeStart && rangeEnd)) {
+      setRangeStart(dateStr)
+      setRangeEnd('')
+      return
+    }
+
+    if (dateStr < rangeStart) {
+      setRangeStart(dateStr)
+      setRangeEnd('')
+      return
+    }
+
+    const dates = getDatesInRange(rangeStart, dateStr)
+    if (dates.length > MAX_RENT_DAYS) {
+      setError(`Максимум ${MAX_RENT_DAYS} дней за раз`)
+      return
+    }
+    if (!dates.every(d => isAvailable(d))) {
+      setError('В этом периоде есть недоступные дни')
+      return
+    }
+
+    setRangeEnd(dateStr)
+  }
+
+  function isInRange(dateStr: string) {
+    if (!rangeStart) return false
+    const end = rangeEnd || rangeStart
+    return dateStr >= rangeStart && dateStr <= end
+  }
 
   async function handleBook() {
     if (!currentUserId) { router.push('/auth'); return }
-    if (!selectedDate) return
+    if (!rangeStart || !rangeComplete) return
     setLoading(true)
     setError('')
     try {
@@ -68,9 +137,9 @@ export default function BookingWidget({ item, currentUserId, initialSlots, initi
         item_id: item.id,
         owner_id: item.owner_id,
         renter_id: currentUserId,
-        start_date: selectedDate,
-        end_date: selectedDate,
-        total_amount: item.price_per_day,
+        start_date: rangeStart,
+        end_date: effectiveEnd,
+        total_amount: totalPrice,
         deposit_amount: item.deposit,
         status: 'pending',
       })
@@ -146,7 +215,7 @@ export default function BookingWidget({ item, currentUserId, initialSlots, initi
 
         {/* Title + close */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-          <span style={{ color: '#fff', fontWeight: 700, fontSize: 16 }}>Выберите дату</span>
+          <span style={{ color: '#fff', fontWeight: 700, fontSize: 16 }}>Выберите даты</span>
           <button
             type="button"
             onClick={() => setSheetOpen(false)}
@@ -163,6 +232,10 @@ export default function BookingWidget({ item, currentUserId, initialSlots, initi
             style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: 8, padding: '4px 12px', color: '#fff', fontSize: 16, cursor: 'pointer' }}>›</button>
         </div>
 
+        <p style={{ color: '#606060', fontSize: 12, marginBottom: 10, lineHeight: 1.4 }}>
+          Нажмите день начала, затем день окончания. До {MAX_RENT_DAYS} дней подряд.
+        </p>
+
         {/* Day headers */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 3, marginBottom: 3 }}>
           {DAY_NAMES.map(d => (
@@ -176,26 +249,28 @@ export default function BookingWidget({ item, currentUserId, initialSlots, initi
             if (!day) return <div key={`e${i}`} />
             const dateStr = formatDate(year, month, day)
             const available = isAvailable(dateStr)
-            const isSelected = selectedDate === dateStr
+            const inRange = isInRange(dateStr)
+            const isStart = rangeStart === dateStr
+            const isEnd = rangeEnd === dateStr
             const isBooked = bookedDates.includes(dateStr)
 
             return (
               <button
                 key={dateStr}
                 type="button"
-                onClick={() => available && setSelectedDate(isSelected ? '' : dateStr)}
+                onClick={() => handleDateClick(dateStr)}
                 disabled={!available}
                 style={{
                   aspectRatio: '1',
                   borderRadius: 8,
                   fontSize: 12,
-                  border: isSelected ? '2px solid #7B5CF0' : '1px solid transparent',
-                  background: isSelected
+                  border: (isStart || isEnd) ? '2px solid #7B5CF0' : inRange ? '1px solid rgba(123,92,240,0.4)' : '1px solid transparent',
+                  background: inRange
                     ? 'rgba(123,92,240,0.3)'
                     : available
                     ? 'rgba(76,175,80,0.15)'
                     : isBooked ? 'rgba(255,77,77,0.1)' : '#1A1A1A',
-                  color: isSelected ? '#7B5CF0' : available ? '#4CAF50' : '#333',
+                  color: inRange ? '#7B5CF0' : available ? '#4CAF50' : '#333',
                   cursor: available ? 'pointer' : 'not-allowed',
                 }}
               >
@@ -215,16 +290,26 @@ export default function BookingWidget({ item, currentUserId, initialSlots, initi
           </span>
         </div>
 
-        {/* Selected date info */}
-        {selectedDate && selectedSlot && (
+        {/* Selected range info */}
+        {rangeStart && (
           <div style={{
             background: 'rgba(123,92,240,0.1)', border: '1px solid rgba(123,92,240,0.2)',
             borderRadius: 10, padding: '8px 12px', marginBottom: 12, fontSize: 13,
           }}>
             <span style={{ color: '#A0A0A0' }}>
-              📅 {new Date(selectedDate + 'T12:00:00').toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })}
-              {'  '}🕐 {selectedSlot.time_from.slice(0,5)} — {selectedSlot.time_to.slice(0,5)}
+              📅 {formatRangeLabel(rangeStart, effectiveEnd)}
+              {selectedSlot && (
+                <> · 🕐 {selectedSlot.time_from.slice(0, 5)} — {slotMap.get(effectiveEnd)?.time_to.slice(0, 5) || selectedSlot.time_to.slice(0, 5)}</>
+              )}
             </span>
+            {!rangeEnd && (
+              <p style={{ color: '#606060', fontSize: 11, marginTop: 4 }}>
+                1 день — можно сразу запросить. Для периода выберите день окончания.
+              </p>
+            )}
+            <p style={{ color: '#7B5CF0', fontSize: 13, fontWeight: 600, marginTop: 6 }}>
+              Итого: {totalPrice.toLocaleString('ru-RU')} ₽
+            </p>
           </div>
         )}
 
@@ -233,11 +318,11 @@ export default function BookingWidget({ item, currentUserId, initialSlots, initi
         <button
           className="btn-primary"
           onClick={handleBook}
-          disabled={!selectedDate || loading}
+          disabled={!rangeComplete || loading}
         >
-          {loading ? 'Отправляем...' : selectedDate
-            ? `Запросить аренду · ${item.price_per_day.toLocaleString('ru-RU')} ₽/день`
-            : 'Выберите дату'}
+          {loading ? 'Отправляем...' : rangeStart
+            ? `Запросить · ${totalPrice.toLocaleString('ru-RU')} ₽`
+            : 'Выберите даты'}
         </button>
       </div>
 
@@ -248,16 +333,17 @@ export default function BookingWidget({ item, currentUserId, initialSlots, initi
             {item.price_per_day.toLocaleString('ru-RU')} ₽
             <span style={{ color: '#606060', fontSize: 13, fontWeight: 400 }}>/день</span>
           </div>
-          {selectedDate ? (
+          {rangeStart ? (
             <div style={{ color: '#7B5CF0', fontSize: 12 }}>
-              📅 {new Date(selectedDate + 'T12:00:00').toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}
+              📅 {formatRangeLabel(rangeStart, effectiveEnd)}
+              {rangeComplete && ` · ${totalPrice.toLocaleString('ru-RU')} ₽`}
             </div>
           ) : (
-            <div style={{ color: '#606060', fontSize: 12 }}>Дата не выбрана</div>
+            <div style={{ color: '#606060', fontSize: 12 }}>Даты не выбраны</div>
           )}
         </div>
 
-        {selectedDate ? (
+        {rangeComplete ? (
           <div style={{ display: 'flex', gap: 8 }}>
             <button
               type="button"
@@ -285,7 +371,7 @@ export default function BookingWidget({ item, currentUserId, initialSlots, initi
             onClick={() => setSheetOpen(true)}
             style={{ minWidth: 160 }}
           >
-            Выбрать дату
+            Выбрать даты
           </button>
         )}
       </div>
