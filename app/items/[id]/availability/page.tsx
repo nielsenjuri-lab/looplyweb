@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { notFound, redirect } from 'next/navigation'
 import AvailabilityManager from './AvailabilityManager'
 import BackButton from '@/components/BackButton'
+import { expandBookingDates } from '@/lib/booking-dates'
 
 export default async function AvailabilityPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -26,6 +27,14 @@ export default async function AvailabilityPage({ params }: { params: Promise<{ i
 
   const unavailableDates = (unavailableRows || []).map((r: { date: string }) => r.date)
 
+  const { data: bookings } = await supabase
+    .from('bookings')
+    .select('start_date, end_date, status')
+    .eq('item_id', id)
+    .in('status', ['pending', 'confirmed', 'active'])
+
+  const bookedDates = expandBookingDates(bookings || [])
+
   return (
     <div style={{ paddingBottom: 40 }}>
       <header style={{
@@ -45,6 +54,7 @@ export default async function AvailabilityPage({ params }: { params: Promise<{ i
         pickupHours={item.pickup_hours || ''}
         pickupNote={item.pickup_note || ''}
         unavailableDates={unavailableDates}
+        bookedDates={bookedDates}
       />
     </div>
   )

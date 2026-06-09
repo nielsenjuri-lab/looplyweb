@@ -19,15 +19,17 @@ function formatDate(year: number, month: number, day: number) {
   return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
 }
 
-export default function AvailabilityManager({ itemId, pickupHours, pickupNote, unavailableDates }: {
+export default function AvailabilityManager({ itemId, pickupHours, pickupNote, unavailableDates, bookedDates = [] }: {
   itemId: string
   pickupHours: string
   pickupNote: string
   unavailableDates: string[]
+  bookedDates?: string[]
 }) {
   const today = new Date()
   const [year, setYear] = useState(today.getFullYear())
   const [month, setMonth] = useState(today.getMonth())
+  const bookedSet = new Set(bookedDates)
   const [blocked, setBlocked] = useState<Set<string>>(new Set(unavailableDates))
   const [hours, setHours] = useState(pickupHours)
   const [note, setNote] = useState(pickupNote)
@@ -39,7 +41,8 @@ export default function AvailabilityManager({ itemId, pickupHours, pickupNote, u
   const todayStr = today.toISOString().split('T')[0]
 
   function toggleDate(dateStr: string) {
-    if (dateStr < todayStr) return // can't block past dates
+    if (dateStr < todayStr) return
+    if (bookedSet.has(dateStr)) return // занято арендой — нельзя менять
     setBlocked((prev) => {
       const next = new Set(prev)
       if (next.has(dateStr)) next.delete(dateStr)
@@ -139,32 +142,36 @@ export default function AvailabilityManager({ itemId, pickupHours, pickupNote, u
             if (!day) return <div key={`empty-${i}`} />
             const dateStr = formatDate(year, month, day)
             const isPast = dateStr < todayStr
-            const isBlocked = blocked.has(dateStr)
+            const isBooked = bookedSet.has(dateStr)
+            const isBlocked = blocked.has(dateStr) && !isBooked
             const isToday = dateStr === todayStr
 
             return (
               <button
                 key={dateStr}
                 onClick={() => toggleDate(dateStr)}
-                disabled={isPast}
+                disabled={isPast || isBooked}
                 style={{
                   aspectRatio: '1',
                   borderRadius: 10,
                   fontSize: 13,
                   fontWeight: isToday ? 700 : 400,
-                  border: isToday ? '2px solid #7B5CF0' : '1px solid transparent',
-                  background: isBlocked
+                  border: isToday ? '2px solid #7B5CF0' : isBooked ? '1px solid rgba(255,77,77,0.5)' : '1px solid transparent',
+                  background: isBooked
+                    ? 'rgba(255,77,77,0.35)'
+                    : isBlocked
                     ? 'rgba(255,77,77,0.25)'
                     : isPast
                     ? 'transparent'
                     : '#1A1A1A',
-                  color: isBlocked
+                  color: isBooked || isBlocked
                     ? '#FF4D4D'
                     : isPast
                     ? '#333'
                     : '#fff',
-                  cursor: isPast ? 'not-allowed' : 'pointer',
+                  cursor: isPast || isBooked ? 'not-allowed' : 'pointer',
                   transition: 'all 0.15s',
+                  position: 'relative',
                 }}
               >
                 {day}
@@ -175,19 +182,32 @@ export default function AvailabilityManager({ itemId, pickupHours, pickupNote, u
       </div>
 
       {/* Legend */}
-      <div style={{ display: 'flex', gap: 16, marginBottom: 20, fontSize: 12, color: '#606060' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: 16, fontSize: 12, color: '#606060' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <div style={{ width: 12, height: 12, borderRadius: 4, background: '#1A1A1A', border: '1px solid #2A2A2A' }} />
           Доступно
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <div style={{ width: 12, height: 12, borderRadius: 4, background: 'rgba(255,77,77,0.35)', border: '1px solid rgba(255,77,77,0.5)' }} />
+          Занято (аренда)
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <div style={{ width: 12, height: 12, borderRadius: 4, background: 'rgba(255,77,77,0.25)' }} />
-          Недоступно
+          Закрыто вами
         </div>
       </div>
 
+      {bookedDates.length > 0 && (
+        <div style={{
+          background: 'rgba(255,77,77,0.08)', border: '1px solid rgba(255,77,77,0.2)',
+          borderRadius: 12, padding: '10px 14px', marginBottom: 16, fontSize: 13, color: '#FF8A8A',
+        }}>
+          🔴 Занято {bookedDates.length} {bookedDates.length === 1 ? 'день' : bookedDates.length < 5 ? 'дня' : 'дней'} — есть активные заявки или аренды
+        </div>
+      )}
+
       <p style={{ color: '#606060', fontSize: 12, marginBottom: 16 }}>
-        Нажмите на дату чтобы отметить её как недоступную. Арендатор не сможет выбрать эти дни.
+        Нажмите на дату чтобы закрыть её вручную. Красные даты с арендой менять нельзя.
       </p>
 
       <button
