@@ -27,9 +27,10 @@ export type AvailableSlot = {
 type Props = {
   value: AvailableSlot[]
   onChange: (slots: AvailableSlot[]) => void
+  bookedDates?: string[]
 }
 
-export default function AvailabilityCalendar({ value, onChange }: Props) {
+export default function AvailabilityCalendar({ value, onChange, bookedDates = [] }: Props) {
   const today = new Date()
   const todayStr = today.toISOString().split('T')[0]
 
@@ -43,9 +44,11 @@ export default function AvailabilityCalendar({ value, onChange }: Props) {
   const rowRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
   const slotMap = new Map(value.map(s => [s.date, s]))
+  const bookedSet = new Set(bookedDates)
 
   function toggleDate(dateStr: string) {
     if (dateStr < todayStr) return
+    if (bookedSet.has(dateStr)) return
     if (slotMap.has(dateStr)) {
       onChange(value.filter(s => s.date !== dateStr))
       if (expandedDate === dateStr) setExpandedDate(null)
@@ -195,7 +198,8 @@ export default function AvailabilityCalendar({ value, onChange }: Props) {
           if (!day) return <div key={`e${i}`} />
           const dateStr = formatDate(year, month, day)
           const isPast = dateStr < todayStr
-          const isSelected = slotMap.has(dateStr)
+          const isBooked = bookedSet.has(dateStr)
+          const isSelected = slotMap.has(dateStr) && !isBooked
           const isToday = dateStr === todayStr
 
           return (
@@ -203,18 +207,20 @@ export default function AvailabilityCalendar({ value, onChange }: Props) {
               key={dateStr}
               type="button"
               onClick={() => toggleDate(dateStr)}
-              disabled={isPast}
+              disabled={isPast || isBooked}
               style={{
                 aspectRatio: '1',
                 borderRadius: 10,
                 fontSize: 13,
                 fontWeight: isToday ? 700 : 400,
-                border: isToday ? '2px solid #7B5CF0' : '1px solid transparent',
-                background: isSelected
+                border: isToday ? '2px solid #7B5CF0' : isBooked ? '1px solid rgba(255,77,77,0.5)' : '1px solid transparent',
+                background: isBooked
+                  ? 'rgba(255,77,77,0.35)'
+                  : isSelected
                   ? 'rgba(76,175,80,0.25)'
                   : isPast ? 'transparent' : '#1A1A1A',
-                color: isSelected ? '#4CAF50' : isPast ? '#2A2A2A' : '#fff',
-                cursor: isPast ? 'not-allowed' : 'pointer',
+                color: isBooked ? '#FF4D4D' : isSelected ? '#4CAF50' : isPast ? '#2A2A2A' : '#fff',
+                cursor: isPast || isBooked ? 'not-allowed' : 'pointer',
                 transition: 'all 0.15s',
                 position: 'relative',
               }}
@@ -233,12 +239,27 @@ export default function AvailabilityCalendar({ value, onChange }: Props) {
         })}
       </div>
 
+      {bookedDates.length > 0 && (
+        <div style={{
+          background: 'rgba(255,77,77,0.08)', border: '1px solid rgba(255,77,77,0.2)',
+          borderRadius: 10, padding: '8px 12px', marginBottom: 12, fontSize: 12, color: '#FF8A8A',
+        }}>
+          🔴 {bookedDates.length} {bookedDates.length === 1 ? 'день занят' : bookedDates.length < 5 ? 'дня занято' : 'дней занято'} арендой — обновляется автоматически
+        </div>
+      )}
+
       {/* Legend */}
-      <div style={{ display: 'flex', gap: 16, marginBottom: 12, fontSize: 12, color: '#606060' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: 12, fontSize: 12, color: '#606060' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
           <div style={{ width: 12, height: 12, borderRadius: 4, background: 'rgba(76,175,80,0.25)', border: '1px solid #4CAF50' }} />
           Доступно
         </div>
+        {bookedDates.length > 0 && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+            <div style={{ width: 12, height: 12, borderRadius: 4, background: 'rgba(255,77,77,0.35)', border: '1px solid rgba(255,77,77,0.5)' }} />
+            Занято
+          </div>
+        )}
         <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
           <div style={{ width: 12, height: 12, borderRadius: 4, background: '#1A1A1A', border: '1px solid #2A2A2A' }} />
           Нажмите чтобы добавить

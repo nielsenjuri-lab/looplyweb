@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound, redirect } from 'next/navigation'
-import AvailabilityManager from './AvailabilityManager'
+import OwnerAvailabilityEditor from './OwnerAvailabilityEditor'
 import BackButton from '@/components/BackButton'
 import { expandBookingDates } from '@/lib/booking-dates'
 
@@ -13,25 +13,31 @@ export default async function AvailabilityPage({ params }: { params: Promise<{ i
 
   const { data: item } = await supabase
     .from('items')
-    .select('id, title, owner_id, pickup_hours, pickup_note')
+    .select('id, title, owner_id, pickup_note')
     .eq('id', id)
     .single()
 
   if (!item) notFound()
   if (item.owner_id !== user.id) redirect('/')
 
-  const { data: unavailableRows } = await supabase
-    .from('item_unavailable_dates')
-    .select('date')
-    .eq('item_id', id)
+  const [{ data: slots }, { data: bookings }] = await Promise.all([
+    supabase
+      .from('item_available_dates')
+      .select('date, time_from, time_to')
+      .eq('item_id', id)
+      .order('date'),
+    supabase
+      .from('bookings')
+      .select('start_date, end_date')
+      .eq('item_id', id)
+      .in('status', ['pending', 'confirmed', 'active']),
+  ])
 
-  const unavailableDates = (unavailableRows || []).map((r: { date: string }) => r.date)
-
-  const { data: bookings } = await supabase
-    .from('bookings')
-    .select('start_date, end_date, status')
-    .eq('item_id', id)
-    .in('status', ['pending', 'confirmed', 'active'])
+  const initialSlots = (slots || []).map(s => ({
+    date: s.date,
+    time_from: String(s.time_from).slice(0, 5),
+    time_to: String(s.time_to).slice(0, 5),
+  }))
 
   const bookedDates = expandBookingDates(bookings || [])
 
@@ -49,11 +55,10 @@ export default async function AvailabilityPage({ params }: { params: Promise<{ i
         </div>
       </header>
 
-      <AvailabilityManager
+      <OwnerAvailabilityEditor
         itemId={id}
-        pickupHours={item.pickup_hours || ''}
         pickupNote={item.pickup_note || ''}
-        unavailableDates={unavailableDates}
+        initialSlots={initialSlots}
         bookedDates={bookedDates}
       />
     </div>

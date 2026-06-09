@@ -7,6 +7,7 @@ import BackButton from '@/components/BackButton'
 import BookingWidget from '@/components/BookingWidget'
 import RatingBadge from '@/components/RatingBadge'
 import { getOwnerRatings } from '@/lib/ratings'
+import { expandBookingDates } from '@/lib/booking-dates'
 
 export default async function ItemPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -36,15 +37,7 @@ export default async function ItemPage({ params }: { params: Promise<{ id: strin
     supabase.from('bookings').select('start_date, end_date').eq('item_id', id).in('status', ['confirmed', 'active', 'pending']),
   ])
 
-  const bookedDates: string[] = []
-  ;(bookings || []).forEach(({ start_date, end_date }) => {
-    const cur = new Date(start_date)
-    const end = new Date(end_date)
-    while (cur <= end) {
-      bookedDates.push(cur.toISOString().split('T')[0])
-      cur.setDate(cur.getDate() + 1)
-    }
-  })
+  const bookedDates = expandBookingDates(bookings || [])
 
   return (
     <div>
