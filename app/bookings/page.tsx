@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import BottomNav from '@/components/BottomNav'
 import BookingsTabs from '@/components/BookingsTabs'
+import BookingSuccessBanner from '@/components/BookingSuccessBanner'
 import type { BookingStatus } from '@/lib/types'
 
 export default async function BookingsPage({
@@ -60,6 +61,7 @@ export default async function BookingsPage({
   const ownerRows = (asOwner || []).map((b) => mapBooking(b as Record<string, unknown>, 'owner', 'Арендатор', b.renter_id as string))
 
   const hasIncoming = ownerRows.some(b => b.status === 'pending')
+  const latestRenterStatus = renterRows[0]?.status ?? null
 
   return (
     <div style={{ paddingBottom: 80 }}>
@@ -71,19 +73,7 @@ export default async function BookingsPage({
       </header>
 
       {success && (
-        <div style={{
-          margin: '16px 16px 0',
-          background: 'rgba(76,175,80,0.12)',
-          border: '1px solid rgba(76,175,80,0.3)',
-          borderRadius: 12,
-          padding: '12px 14px',
-          display: 'flex', alignItems: 'center', gap: 10,
-        }}>
-          <span>✅</span>
-          <p style={{ color: '#4CAF50', fontSize: 14 }}>
-            Заявка отправлена! Ждите подтверждения от владельца.
-          </p>
-        </div>
+        <BookingSuccessBanner latestRenterStatus={latestRenterStatus} />
       )}
 
       <BookingsTabs

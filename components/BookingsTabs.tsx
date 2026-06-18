@@ -5,6 +5,7 @@ import Link from 'next/link'
 import BookingActions from '@/components/BookingActions'
 import BookingChat from '@/components/BookingChat'
 import BookingHandover from '@/components/BookingHandover'
+import BookingTimeline from '@/components/BookingTimeline'
 import ReviewForm from '@/components/ReviewForm'
 import { CHAT_VISIBLE_STATUSES, CHAT_WRITABLE_STATUSES } from '@/lib/booking-access'
 import type { BookingStatus } from '@/lib/types'
@@ -107,6 +108,15 @@ function BookingCard({
           {status.label}
         </div>
       </div>
+
+      <BookingTimeline
+        status={booking.status}
+        startDate={booking.start_date}
+        endDate={booking.end_date}
+        role={booking.role}
+        renterPickupConfirmed={!!booking.renter_pickup_confirmed_at}
+        ownerHandoverConfirmed={!!booking.owner_handover_confirmed_at}
+      />
 
       {chatAvailable && (
         <div style={{ padding: '0 14px 10px' }}>
