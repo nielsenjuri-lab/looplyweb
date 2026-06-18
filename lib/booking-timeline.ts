@@ -23,6 +23,15 @@ function parseDateEnd(dateStr: string) {
   return new Date(y, m - 1, d, 23, 59, 59, 999)
 }
 
+function formatShortDate(dateStr: string) {
+  return new Date(dateStr + 'T12:00:00').toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })
+}
+
+function formatPeriod(startDate: string, endDate: string) {
+  if (startDate === endDate) return formatShortDate(startDate)
+  return `${formatShortDate(startDate)} — ${formatShortDate(endDate)}`
+}
+
 export function getRentalPhase(startDate: string, endDate: string, now = new Date()): TimelinePhase {
   const start = parseDateStart(startDate)
   const end = parseDateEnd(endDate)
@@ -127,28 +136,22 @@ export function getBookingTimeline(
   }
 
   if (status === 'active') {
-    if (phase === 'before_start') {
-      return {
-        headline: 'Передача подтверждена',
-        hint: role === 'renter'
-          ? 'Вещь у вас — аренда начнётся в указанный день'
-          : 'Вещь передана — аренда начнётся в указанный день',
-        timerLabel: 'До начала аренды',
-        timerMs: start.getTime() - now.getTime(),
-        phase,
-        accent: '#4CAF50',
-        bg: 'rgba(76,175,80,0.12)',
-        border: 'rgba(76,175,80,0.3)',
-      }
-    }
+    const returnBy = formatShortDate(endDate)
+    const paidPeriod = formatPeriod(startDate, endDate)
 
-    if (phase === 'during') {
+    // После передачи вещи — всегда показываем до возврата, не «до начала»
+    if (phase === 'before_start' || phase === 'during') {
+      const earlyPickup = phase === 'before_start'
       return {
         headline: 'Аренда идёт',
         hint: role === 'renter'
-          ? 'Пользуйтесь вещью и верните в срок'
-          : 'Арендатор пользуется вашей вещью',
-        timerLabel: 'Осталось',
+          ? earlyPickup
+            ? `Вещь уже у вас. Оплаченный срок: ${paidPeriod}. Верните до ${returnBy}`
+            : `Пользуйтесь вещью и верните до ${returnBy}`
+          : earlyPickup
+            ? `Вещь у арендатора. Оплаченный срок: ${paidPeriod}. Возврат до ${returnBy}`
+            : 'Арендатор пользуется вашей вещью',
+        timerLabel: 'До возврата',
         timerMs: end.getTime() - now.getTime(),
         phase,
         accent: '#4CAF50',
