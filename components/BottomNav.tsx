@@ -1,12 +1,15 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
 
 const tabs = [
   {
     href: '/',
     label: 'Каталог',
+    requiresAuth: false,
     icon: (active: boolean) => (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
         <rect x="3" y="3" width="8" height="8" rx="2" fill={active ? '#7B5CF0' : 'none'} stroke={active ? '#7B5CF0' : '#606060'} strokeWidth="1.5"/>
@@ -19,6 +22,7 @@ const tabs = [
   {
     href: '/search',
     label: 'Поиск',
+    requiresAuth: false,
     icon: (active: boolean) => (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
         <circle cx="11" cy="11" r="7" stroke={active ? '#7B5CF0' : '#606060'} strokeWidth="1.5"/>
@@ -29,6 +33,7 @@ const tabs = [
   {
     href: '/create',
     label: 'Сдать',
+    requiresAuth: true,
     icon: (_active: boolean) => (
       <div style={{
         width: 48,
@@ -50,6 +55,7 @@ const tabs = [
   {
     href: '/bookings',
     label: 'Аренды',
+    requiresAuth: true,
     icon: (active: boolean) => (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
         <rect x="3" y="4" width="18" height="17" rx="3" stroke={active ? '#7B5CF0' : '#606060'} strokeWidth="1.5"/>
@@ -61,6 +67,7 @@ const tabs = [
   {
     href: '/profile',
     label: 'Профиль',
+    requiresAuth: true,
     icon: (active: boolean) => (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
         <circle cx="12" cy="8" r="4" stroke={active ? '#7B5CF0' : '#606060'} strokeWidth="1.5"/>
@@ -72,6 +79,21 @@ const tabs = [
 
 export default function BottomNav() {
   const pathname = usePathname()
+  const router = useRouter()
+  const [userId, setUserId] = useState<string | null>(null)
+
+  useEffect(() => {
+    createClient().auth.getUser().then(({ data }) => {
+      setUserId(data.user?.id ?? null)
+    })
+  }, [pathname])
+
+  function handleNav(e: React.MouseEvent, href: string, requiresAuth: boolean) {
+    if (requiresAuth && !userId) {
+      e.preventDefault()
+      router.push('/auth')
+    }
+  }
 
   return (
     <nav style={{
@@ -95,6 +117,7 @@ export default function BottomNav() {
           <Link
             key={tab.href}
             href={tab.href}
+            onClick={(e) => handleNav(e, tab.href, tab.requiresAuth)}
             style={{
               flex: 1,
               display: 'flex',

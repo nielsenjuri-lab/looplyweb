@@ -60,6 +60,14 @@ export type BookingStatus =
   | 'completed'
   | 'cancelled'
 
+export type Message = {
+  id: string
+  booking_id: string
+  sender_id: string
+  text: string
+  created_at: string
+}
+
 export type Review = {
   id: string
   booking_id: string

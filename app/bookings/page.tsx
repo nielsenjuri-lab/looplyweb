@@ -7,9 +7,9 @@ import type { BookingStatus } from '@/lib/types'
 export default async function BookingsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ success?: string }>
+  searchParams: Promise<{ success?: string; openChat?: string }>
 }) {
-  const { success } = await searchParams
+  const { success, openChat } = await searchParams
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -92,7 +92,9 @@ export default async function BookingsPage({
       <BookingsTabs
         asRenter={renterRows}
         asOwner={ownerRows}
+        currentUserId={user.id}
         initialTab={hasIncoming ? 'owner' : 'renter'}
+        initialOpenChatId={openChat}
       />
 
       <BottomNav />

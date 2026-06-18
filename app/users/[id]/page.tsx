@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import BottomNav from '@/components/BottomNav'
 import BackButton from '@/components/BackButton'
 import RatingBadge from '@/components/RatingBadge'
@@ -11,6 +11,9 @@ import { getOwnerRatings, attachOwnerRatings } from '@/lib/ratings'
 export default async function UserProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/auth')
 
   const { data: profile } = await supabase
     .from('profiles')

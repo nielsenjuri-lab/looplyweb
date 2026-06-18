@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { CATEGORIES, SPB_DISTRICTS } from '@/lib/types'
@@ -16,6 +16,15 @@ export default function CreatePage() {
   const [availableSlots, setAvailableSlots] = useState<AvailableSlot[]>([])
   const cameraInputRef = useRef<HTMLInputElement>(null)
   const galleryInputRef = useRef<HTMLInputElement>(null)
+
+  const [authReady, setAuthReady] = useState(false)
+
+  useEffect(() => {
+    createClient().auth.getUser().then(({ data }) => {
+      if (!data.user) router.replace('/auth')
+      else setAuthReady(true)
+    })
+  }, [router])
 
   const [form, setForm] = useState({
     title: '',
@@ -108,6 +117,14 @@ export default function CreatePage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  if (!authReady) {
+    return (
+      <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#606060' }}>
+        Загрузка...
+      </div>
+    )
   }
 
   return (

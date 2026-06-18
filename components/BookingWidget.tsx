@@ -174,6 +174,27 @@ export default function BookingWidget({ item, currentUserId, initialSlots, initi
 
   if (!mounted) return null
 
+  if (!currentUserId) {
+    return (
+      <div className="booking-bar-inline">
+        <div>
+          <div style={{ color: '#fff', fontWeight: 700, fontSize: 18 }}>
+            {item.price_per_day.toLocaleString('ru-RU')} ₽
+            <span style={{ color: '#606060', fontSize: 13, fontWeight: 400 }}>/день</span>
+          </div>
+          <div style={{ color: '#606060', fontSize: 12 }}>Выберите даты после входа</div>
+        </div>
+        <button
+          className="btn-primary"
+          onClick={() => router.push('/auth')}
+          style={{ minWidth: 160 }}
+        >
+          Выбрать даты
+        </button>
+      </div>
+    )
+  }
+
   const daysInMonth = getDaysInMonth(year, month)
   const firstDay = getFirstDayOfWeek(year, month)
   const cells: (number | null)[] = []

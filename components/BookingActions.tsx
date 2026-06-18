@@ -9,9 +9,10 @@ type Props = {
   bookingId: string
   status: BookingStatus
   role: 'owner' | 'renter'
+  onConfirmed?: (bookingId: string) => void
 }
 
-export default function BookingActions({ bookingId, status, role }: Props) {
+export default function BookingActions({ bookingId, status, role, onConfirmed }: Props) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [confirmReject, setConfirmReject] = useState(false)
@@ -27,6 +28,7 @@ export default function BookingActions({ bookingId, status, role }: Props) {
     if (error) {
       alert(error.message)
     } else {
+      if (next === 'confirmed') onConfirmed?.(bookingId)
       router.refresh()
     }
     setLoading(false)

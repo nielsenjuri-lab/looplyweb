@@ -1,9 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import BookingActions from '@/components/BookingActions'
+import BookingChat from '@/components/BookingChat'
 import ReviewForm from '@/components/ReviewForm'
+import { CHAT_VISIBLE_STATUSES, CHAT_WRITABLE_STATUSES } from '@/lib/booking-access'
 import type { BookingStatus } from '@/lib/types'
 
 const STATUS_LABELS: Record<string, { label: string; color: string; bg: string }> = {
@@ -34,13 +36,26 @@ type BookingRow = {
 type Props = {
   asRenter: BookingRow[]
   asOwner: BookingRow[]
+  currentUserId: string
   initialTab?: 'renter' | 'owner'
+  initialOpenChatId?: string
 }
 
-function BookingCard({ booking }: { booking: BookingRow }) {
+function BookingCard({
+  booking,
+  onOpenChat,
+  onConfirmed,
+}: {
+  booking: BookingRow
+  currentUserId: string
+  onOpenChat: (booking: BookingRow) => void
+  onConfirmed: (bookingId: string) => void
+}) {
   const status = STATUS_LABELS[booking.status] || STATUS_LABELS.pending
   const item = booking.item
   const isSingleDay = booking.start_date === booking.end_date
+  const chatAvailable = CHAT_VISIBLE_STATUSES.includes(booking.status)
+  const chatWritable = CHAT_WRITABLE_STATUSES.includes(booking.status)
 
   return (
     <div style={{ background: '#1A1A1A', borderRadius: 16, overflow: 'hidden' }}>
@@ -85,7 +100,30 @@ function BookingCard({ booking }: { booking: BookingRow }) {
         </div>
       </div>
 
-      <BookingActions bookingId={booking.id} status={booking.status} role={booking.role} />
+      {chatAvailable && (
+        <div style={{ padding: '0 14px 10px' }}>
+          <button
+            type="button"
+            onClick={() => onOpenChat(booking)}
+            style={{
+              width: '100%', padding: '11px', borderRadius: 10,
+              background: chatWritable ? 'rgba(123,92,240,0.18)' : 'rgba(96,96,96,0.12)',
+              border: chatWritable ? '1px solid rgba(123,92,240,0.35)' : '1px solid #2A2A2A',
+              color: chatWritable ? '#B89CFF' : '#A0A0A0',
+              fontWeight: 600, fontSize: 13, cursor: 'pointer',
+            }}
+          >
+            💬 {chatWritable ? 'Открыть чат' : 'История чата'}
+          </button>
+        </div>
+      )}
+
+      <BookingActions
+        bookingId={booking.id}
+        status={booking.status}
+        role={booking.role}
+        onConfirmed={onConfirmed}
+      />
 
       {booking.status === 'completed' && !booking.hasReview && booking.revieweeId && booking.person && (
         <ReviewForm
@@ -106,10 +144,34 @@ function BookingCard({ booking }: { booking: BookingRow }) {
   )
 }
 
-export default function BookingsTabs({ asRenter, asOwner, initialTab }: Props) {
+export default function BookingsTabs({
+  asRenter,
+  asOwner,
+  currentUserId,
+  initialTab,
+  initialOpenChatId,
+}: Props) {
   const pendingIncoming = asOwner.filter(b => b.status === 'pending').length
   const [tab, setTab] = useState<'renter' | 'owner'>(initialTab || 'renter')
+  const [chatBooking, setChatBooking] = useState<BookingRow | null>(null)
   const list = tab === 'renter' ? asRenter : asOwner
+  const allBookings = [...asRenter, ...asOwner]
+
+  function openChat(booking: BookingRow) {
+    setChatBooking(booking)
+  }
+
+  function openChatById(bookingId: string, optimisticStatus?: BookingStatus) {
+    const found = allBookings.find(b => b.id === bookingId)
+    if (found) {
+      setTab(found.role === 'owner' ? 'owner' : 'renter')
+      setChatBooking(optimisticStatus ? { ...found, status: optimisticStatus } : found)
+    }
+  }
+
+  useEffect(() => {
+    if (initialOpenChatId) openChatById(initialOpenChatId)
+  }, [initialOpenChatId, asRenter, asOwner])
 
   return (
     <>
@@ -177,11 +239,29 @@ export default function BookingsTabs({ asRenter, asOwner, initialTab }: Props) {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {list.map((booking) => (
-              <BookingCard key={booking.id} booking={booking} />
+              <BookingCard
+                key={booking.id}
+                booking={booking}
+                currentUserId={currentUserId}
+                onOpenChat={openChat}
+                onConfirmed={(id) => openChatById(id, 'confirmed')}
+              />
             ))}
           </div>
         )}
       </div>
+
+      {chatBooking && chatBooking.person && (
+        <BookingChat
+          bookingId={chatBooking.id}
+          bookingStatus={chatBooking.status}
+          currentUserId={currentUserId}
+          otherPersonName={chatBooking.person.name || 'Пользователь'}
+          itemTitle={chatBooking.item?.title || 'Объявление'}
+          open={!!chatBooking}
+          onClose={() => setChatBooking(null)}
+        />
+      )}
     </>
   )
 }
