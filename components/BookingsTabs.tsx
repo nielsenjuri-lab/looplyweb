@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import BookingActions from '@/components/BookingActions'
 import BookingChat from '@/components/BookingChat'
+import BookingHandover from '@/components/BookingHandover'
 import ReviewForm from '@/components/ReviewForm'
 import { CHAT_VISIBLE_STATUSES, CHAT_WRITABLE_STATUSES } from '@/lib/booking-access'
 import type { BookingStatus } from '@/lib/types'
@@ -25,6 +26,13 @@ type BookingRow = {
   start_date: string
   end_date: string
   total_amount: number
+  deposit_amount: number | null
+  renter_pickup_confirmed_at: string | null
+  owner_handover_confirmed_at: string | null
+  pickup_rejected_at: string | null
+  pickup_reject_reason: string | null
+  payment_captured_at: string | null
+  payment_status: string | null
   item: ItemInfo | null
   person: PersonInfo | null
   personLabel: string
@@ -118,12 +126,34 @@ function BookingCard({
         </div>
       )}
 
+      <BookingHandover
+        booking={{
+          id: booking.id,
+          status: booking.status,
+          total_amount: booking.total_amount,
+          deposit_amount: booking.deposit_amount,
+          renter_pickup_confirmed_at: booking.renter_pickup_confirmed_at,
+          owner_handover_confirmed_at: booking.owner_handover_confirmed_at,
+          pickup_rejected_at: booking.pickup_rejected_at,
+          pickup_reject_reason: booking.pickup_reject_reason,
+          payment_captured_at: booking.payment_captured_at,
+          payment_status: booking.payment_status,
+        }}
+        role={booking.role}
+      />
+
       <BookingActions
         bookingId={booking.id}
         status={booking.status}
         role={booking.role}
         onConfirmed={onConfirmed}
       />
+
+      {booking.status === 'cancelled' && booking.pickup_reject_reason && (
+        <div style={{ padding: '0 14px 14px', fontSize: 12, color: '#FF8A8A', lineHeight: 1.5 }}>
+          Причина отказа: {booking.pickup_reject_reason}
+        </div>
+      )}
 
       {booking.status === 'completed' && !booking.hasReview && booking.revieweeId && booking.person && (
         <ReviewForm

@@ -48,6 +48,12 @@ export type Booking = {
   deposit_amount: number | null
   status: BookingStatus
   created_at: string
+  renter_pickup_confirmed_at?: string | null
+  owner_handover_confirmed_at?: string | null
+  pickup_rejected_at?: string | null
+  pickup_reject_reason?: string | null
+  payment_captured_at?: string | null
+  payment_status?: string | null
   item?: Item
   renter?: Profile
   owner?: Profile
@@ -66,6 +72,12 @@ export type Message = {
   sender_id: string
   text: string
   created_at: string
+}
+
+export type MessageRead = {
+  message_id: string
+  reader_id: string
+  read_at: string
 }
 
 export type Review = {

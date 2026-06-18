@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { createClient } from '@/lib/supabase/client'
-import type { Message, BookingStatus } from '@/lib/types'
+import type { Message, MessageRead, BookingStatus } from '@/lib/types'
 import { CHAT_WRITABLE_STATUSES } from '@/lib/booking-access'
 
 type Props = {
@@ -35,6 +35,7 @@ export default function BookingChat({
   onClose,
 }: Props) {
   const [messages, setMessages] = useState<Message[]>([])
+  const [reads, setReads] = useState<MessageRead[]>([])
   const [text, setText] = useState('')
   const [loading, setLoading] = useState(false)
   const [sending, setSending] = useState(false)
@@ -50,6 +51,20 @@ export default function BookingChat({
     document.body.style.overflow = 'hidden'
     return () => { document.body.style.overflow = '' }
   }, [open])
+
+  const markAsRead = useCallback(async (msgs: Message[]) => {
+    const supabase = createClient()
+    const unread = msgs.filter(m => m.sender_id !== currentUserId)
+    if (!unread.length) return
+
+    const now = new Date().toISOString()
+    for (const msg of unread) {
+      await supabase.from('message_reads').upsert(
+        { message_id: msg.id, reader_id: currentUserId, read_at: now },
+        { onConflict: 'message_id,reader_id' }
+      )
+    }
+  }, [currentUserId])
 
   async function loadMessages() {
     const supabase = createClient()
@@ -67,16 +82,34 @@ export default function BookingChat({
         msg.includes('schema cache') ||
         msg.includes('public.messages')
       ) {
-        setError(
-          'Таблица messages не создана. Откройте Supabase → SQL Editor → вставьте код из docs/messages.sql → Run.'
-        )
+        setError('Таблица messages не создана. Выполните docs/messages.sql в Supabase.')
       } else {
         setError(msg)
       }
       return
     }
-    setMessages((data as Message[]) || [])
+
+    const loaded = (data as Message[]) || []
+    setMessages(loaded)
     setError('')
+
+    if (loaded.length) {
+      const { data: readRows } = await supabase
+        .from('message_reads')
+        .select('message_id, reader_id, read_at')
+        .in('message_id', loaded.map(m => m.id))
+
+      if (readRows) setReads(readRows as MessageRead[])
+
+      if (open) {
+        await markAsRead(loaded)
+        const { data: freshReads } = await supabase
+          .from('message_reads')
+          .select('message_id, reader_id, read_at')
+          .in('message_id', loaded.map(m => m.id))
+        if (freshReads) setReads(freshReads as MessageRead[])
+      }
+    }
   }
 
   useEffect(() => {
@@ -89,19 +122,13 @@ export default function BookingChat({
       .channel(`booking-chat-${bookingId}`)
       .on(
         'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages',
-          filter: `booking_id=eq.${bookingId}`,
-        },
-        (payload) => {
-          const msg = payload.new as Message
-          setMessages(prev => {
-            if (prev.some(m => m.id === msg.id)) return prev
-            return [...prev, msg]
-          })
-        }
+        { event: 'INSERT', schema: 'public', table: 'messages', filter: `booking_id=eq.${bookingId}` },
+        () => { loadMessages() }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'message_reads' },
+        () => { loadMessages() }
       )
       .subscribe()
 
@@ -116,7 +143,7 @@ export default function BookingChat({
   useEffect(() => {
     if (!open || !messagesRef.current) return
     messagesRef.current.scrollTop = messagesRef.current.scrollHeight
-  }, [messages, open])
+  }, [messages, reads, open])
 
   async function handleSend(e: React.FormEvent) {
     e.preventDefault()
@@ -133,17 +160,16 @@ export default function BookingChat({
       .single()
 
     if (sendError) {
-      const msg = sendError.message || ''
-      if (msg.includes('schema cache') || msg.includes('public.messages')) {
-        setError('Сначала создайте таблицу: Supabase → SQL Editor → docs/messages.sql')
-      } else {
-        setError(msg)
-      }
+      setError(sendError.message)
     } else if (data) {
       setMessages(prev => [...prev, data as Message])
       setText('')
     }
     setSending(false)
+  }
+
+  function getReadByOther(messageId: string) {
+    return reads.find(r => r.message_id === messageId && r.reader_id !== currentUserId)
   }
 
   if (!open || !mounted) return null
@@ -162,20 +188,11 @@ export default function BookingChat({
         role="dialog"
         aria-label="Чат по бронированию"
         style={{
-          position: 'fixed',
-          left: 0,
-          right: 0,
-          bottom: 0,
-          margin: '0 auto',
-          width: '100%',
-          maxWidth: 480,
-          height: 'min(85dvh, 640px)',
-          background: '#111',
-          borderTop: '1px solid #2A2A2A',
-          borderRadius: '20px 20px 0 0',
-          zIndex: 9999,
-          display: 'flex',
-          flexDirection: 'column',
+          position: 'fixed', left: 0, right: 0, bottom: 0, margin: '0 auto',
+          width: '100%', maxWidth: 480, height: 'min(85dvh, 640px)',
+          background: '#111', borderTop: '1px solid #2A2A2A',
+          borderRadius: '20px 20px 0 0', zIndex: 9999,
+          display: 'flex', flexDirection: 'column',
           boxShadow: '0 -8px 40px rgba(0,0,0,0.5)',
         }}
       >
@@ -184,10 +201,8 @@ export default function BookingChat({
         </div>
 
         <div style={{
-          padding: '8px 16px 12px',
-          borderBottom: '1px solid #1A1A1A',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
-          flexShrink: 0,
+          padding: '8px 16px 12px', borderBottom: '1px solid #1A1A1A',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexShrink: 0,
         }}>
           <div style={{ minWidth: 0 }}>
             <p style={{ color: '#fff', fontWeight: 700, fontSize: 16 }}>💬 Чат</p>
@@ -195,15 +210,10 @@ export default function BookingChat({
               {otherPersonName} · {itemTitle}
             </p>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            style={{
-              background: '#1A1A1A', border: '1px solid #2A2A2A',
-              borderRadius: 8, padding: '8px 12px', color: '#A0A0A0', cursor: 'pointer',
-              flexShrink: 0,
-            }}
-          >
+          <button type="button" onClick={onClose} style={{
+            background: '#1A1A1A', border: '1px solid #2A2A2A',
+            borderRadius: 8, padding: '8px 12px', color: '#A0A0A0', cursor: 'pointer', flexShrink: 0,
+          }}>
             ✕
           </button>
         </div>
@@ -211,61 +221,45 @@ export default function BookingChat({
         <div
           ref={messagesRef}
           style={{
-            flex: 1,
-            minHeight: 0,
-            overflowY: 'auto',
-            WebkitOverflowScrolling: 'touch',
-            padding: '16px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 10,
+            flex: 1, minHeight: 0, overflowY: 'auto', WebkitOverflowScrolling: 'touch',
+            padding: '16px', display: 'flex', flexDirection: 'column', gap: 10,
           }}
         >
           {loading && messages.length === 0 && (
-            <p style={{ color: '#A0A0A0', fontSize: 13, textAlign: 'center', marginTop: 24 }}>
-              Загрузка...
-            </p>
+            <p style={{ color: '#A0A0A0', fontSize: 13, textAlign: 'center', marginTop: 24 }}>Загрузка...</p>
           )}
 
           {!loading && messages.length === 0 && (
             <div style={{ textAlign: 'center', padding: '32px 12px', margin: 'auto 0' }}>
               <p style={{ fontSize: 36, marginBottom: 12 }}>👋</p>
-              <p style={{ color: '#fff', fontSize: 15, fontWeight: 600, marginBottom: 8 }}>
-                Бронь подтверждена
-              </p>
+              <p style={{ color: '#fff', fontSize: 15, fontWeight: 600, marginBottom: 8 }}>Бронь подтверждена</p>
               <p style={{ color: '#A0A0A0', fontSize: 13, lineHeight: 1.55 }}>
-                Договоритесь о времени и месте встречи.
-                <br />
-                Контакты — на странице объявления.
+                Договоритесь о встрече. После осмотра подтвердите передачу свайпом в «Аренды».
               </p>
             </div>
           )}
 
           {messages.map(msg => {
             const mine = msg.sender_id === currentUserId
+            const readByOther = mine ? getReadByOther(msg.id) : null
             return (
-              <div
-                key={msg.id}
-                style={{
-                  alignSelf: mine ? 'flex-end' : 'flex-start',
-                  maxWidth: '82%',
-                }}
-              >
+              <div key={msg.id} style={{ alignSelf: mine ? 'flex-end' : 'flex-start', maxWidth: '82%' }}>
                 <div style={{
                   background: mine ? 'rgba(123,92,240,0.3)' : '#1A1A1A',
                   border: mine ? '1px solid rgba(123,92,240,0.4)' : '1px solid #2A2A2A',
                   borderRadius: mine ? '14px 14px 4px 14px' : '14px 14px 14px 4px',
                   padding: '10px 12px',
                 }}>
-                  <p style={{ color: '#fff', fontSize: 14, lineHeight: 1.45, whiteSpace: 'pre-wrap' }}>
-                    {msg.text}
-                  </p>
+                  <p style={{ color: '#fff', fontSize: 14, lineHeight: 1.45, whiteSpace: 'pre-wrap' }}>{msg.text}</p>
                 </div>
                 <p style={{
                   color: '#606060', fontSize: 10, marginTop: 4,
                   textAlign: mine ? 'right' : 'left',
                 }}>
                   {formatTime(msg.created_at)}
+                  {readByOther && (
+                    <> · просмотрено {formatTime(readByOther.read_at)}</>
+                  )}
                 </p>
               </div>
             )
@@ -273,24 +267,17 @@ export default function BookingChat({
         </div>
 
         {error && (
-          <p style={{
-            color: '#FF8A8A', fontSize: 12, padding: '0 16px 8px',
-            flexShrink: 0, lineHeight: 1.4,
-          }}>
+          <p style={{ color: '#FF8A8A', fontSize: 12, padding: '0 16px 8px', flexShrink: 0, lineHeight: 1.4 }}>
             ⚠️ {error}
           </p>
         )}
 
         {canWrite ? (
-          <form
-            onSubmit={handleSend}
-            style={{
-              padding: '12px 16px calc(12px + env(safe-area-inset-bottom))',
-              borderTop: '1px solid #1A1A1A',
-              display: 'flex', gap: 8, alignItems: 'center',
-              flexShrink: 0, background: '#111',
-            }}
-          >
+          <form onSubmit={handleSend} style={{
+            padding: '12px 16px calc(12px + env(safe-area-inset-bottom))',
+            borderTop: '1px solid #1A1A1A', display: 'flex', gap: 8, alignItems: 'center',
+            flexShrink: 0, background: '#111',
+          }}>
             <input
               value={text}
               onChange={e => setText(e.target.value)}
@@ -298,24 +285,15 @@ export default function BookingChat({
               maxLength={2000}
               style={{
                 flex: 1, minWidth: 0, padding: '12px 14px', fontSize: 14,
-                background: '#1A1A1A', border: '1px solid #2A2A2A',
-                borderRadius: 12, color: '#fff',
+                background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: 12, color: '#fff',
               }}
             />
-            <button
-              type="submit"
-              disabled={!text.trim() || sending}
-              style={{
-                flexShrink: 0,
-                width: 48, height: 48,
-                background: '#7B5CF0',
-                color: '#fff',
-                borderRadius: 12,
-                fontSize: 18, fontWeight: 700,
-                opacity: !text.trim() || sending ? 0.5 : 1,
-                cursor: !text.trim() || sending ? 'not-allowed' : 'pointer',
-              }}
-            >
+            <button type="submit" disabled={!text.trim() || sending} style={{
+              flexShrink: 0, width: 48, height: 48, background: '#7B5CF0', color: '#fff',
+              borderRadius: 12, fontSize: 18, fontWeight: 700,
+              opacity: !text.trim() || sending ? 0.5 : 1,
+              cursor: !text.trim() || sending ? 'not-allowed' : 'pointer',
+            }}>
               ↑
             </button>
           </form>

@@ -180,15 +180,27 @@ export default async function ProfilePage() {
                 )
                 return (
                   <div key={item.id}>
-                    {item.status === 'published' ? (
-                      <Link href={`/items/${item.id}`} style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#1A1A1A', borderRadius: 12, padding: '12px' }}>
-                        {rowContent}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#1A1A1A', borderRadius: 12, padding: '12px' }}>
+                      {item.status === 'published' ? (
+                        <Link href={`/items/${item.id}`} style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1, minWidth: 0 }}>
+                          {rowContent}
+                        </Link>
+                      ) : (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1, minWidth: 0 }}>
+                          {rowContent}
+                        </div>
+                      )}
+                      <Link
+                        href={`/items/${item.id}/edit`}
+                        style={{
+                          flexShrink: 0, padding: '8px 12px', borderRadius: 10,
+                          background: 'rgba(123,92,240,0.15)', border: '1px solid rgba(123,92,240,0.3)',
+                          color: '#7B5CF0', fontSize: 12, fontWeight: 600,
+                        }}
+                      >
+                        ✏️
                       </Link>
-                    ) : (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#1A1A1A', borderRadius: 12, padding: '12px' }}>
-                        {rowContent}
-                      </div>
-                    )}
+                    </div>
                     {item.status === 'archived' && reject && (
                       <div style={{ background: 'rgba(255,77,77,0.08)', border: '1px solid rgba(255,77,77,0.2)', borderRadius: '0 0 12px 12px', padding: '8px 12px', marginTop: -4 }}>
                         <p style={{ color: '#FF4D4D', fontSize: 12 }}>✉️ Причина: {reject}</p>

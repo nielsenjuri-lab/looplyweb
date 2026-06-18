@@ -165,9 +165,14 @@ export default function BookingWidget({ item, currentUserId, initialSlots, initi
         }}>
           Это ваше объявление
         </div>
-        <a href={`/items/${item.id}/availability`} className="btn-primary" style={{ display: 'flex', justifyContent: 'center' }}>
-          📅 Управлять доступностью
-        </a>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <a href={`/items/${item.id}/edit`} className="btn-primary" style={{ display: 'flex', justifyContent: 'center' }}>
+            ✏️ Редактировать
+          </a>
+          <a href={`/items/${item.id}/availability`} className="btn-ghost" style={{ display: 'flex', justifyContent: 'center' }}>
+            📅 Управлять доступностью
+          </a>
+        </div>
       </div>
     )
   }

@@ -74,7 +74,7 @@ export default function BookingActions({ bookingId, status, role, onConfirmed }:
     )
   }
 
-  if (role === 'owner' && status === 'confirmed') {
+  if (role === 'owner' && status === 'active') {
     return (
       <div style={{ padding: '0 14px 14px' }}>
         <button

@@ -34,33 +34,30 @@ export default async function BookingsPage({
 
   const reviewedBookingIds = new Set((myReviews || []).map(r => r.booking_id))
 
-  const renterRows = (asRenter || []).map((b) => ({
-    id: b.id,
+  const mapBooking = (b: Record<string, unknown>, role: 'renter' | 'owner', personLabel: string, revieweeId: string) => ({
+    id: b.id as string,
     status: b.status as BookingStatus,
-    start_date: b.start_date,
-    end_date: b.end_date,
-    total_amount: b.total_amount,
+    start_date: b.start_date as string,
+    end_date: b.end_date as string,
+    total_amount: b.total_amount as number,
+    deposit_amount: (b.deposit_amount as number | null) ?? null,
+    renter_pickup_confirmed_at: (b.renter_pickup_confirmed_at as string | null) ?? null,
+    owner_handover_confirmed_at: (b.owner_handover_confirmed_at as string | null) ?? null,
+    pickup_rejected_at: (b.pickup_rejected_at as string | null) ?? null,
+    pickup_reject_reason: (b.pickup_reject_reason as string | null) ?? null,
+    payment_captured_at: (b.payment_captured_at as string | null) ?? null,
+    payment_status: (b.payment_status as string | null) ?? null,
     item: b.item as { id: string; title: string; image_urls: string[]; price_per_day: number } | null,
-    person: b.owner as { id: string; name: string; avatar_url: string | null; rating?: number; review_count?: number } | null,
-    personLabel: 'Владелец',
-    role: 'renter' as const,
-    revieweeId: b.owner_id as string,
-    hasReview: reviewedBookingIds.has(b.id),
-  }))
+    person: (role === 'renter' ? b.owner : b.renter) as { id: string; name: string; avatar_url: string | null; rating?: number; review_count?: number } | null,
+    personLabel,
+    role,
+    revieweeId,
+    hasReview: reviewedBookingIds.has(b.id as string),
+  })
 
-  const ownerRows = (asOwner || []).map((b) => ({
-    id: b.id,
-    status: b.status as BookingStatus,
-    start_date: b.start_date,
-    end_date: b.end_date,
-    total_amount: b.total_amount,
-    item: b.item as { id: string; title: string; image_urls: string[]; price_per_day: number } | null,
-    person: b.renter as { id: string; name: string; avatar_url: string | null; rating?: number; review_count?: number } | null,
-    personLabel: 'Арендатор',
-    role: 'owner' as const,
-    revieweeId: b.renter_id as string,
-    hasReview: reviewedBookingIds.has(b.id),
-  }))
+  const renterRows = (asRenter || []).map((b) => mapBooking(b as Record<string, unknown>, 'renter', 'Владелец', b.owner_id as string))
+
+  const ownerRows = (asOwner || []).map((b) => mapBooking(b as Record<string, unknown>, 'owner', 'Арендатор', b.renter_id as string))
 
   const hasIncoming = ownerRows.some(b => b.status === 'pending')
 
