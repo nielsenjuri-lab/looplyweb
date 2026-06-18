@@ -4,6 +4,7 @@ import BottomNav from '@/components/BottomNav'
 import SignOutButton from '@/components/SignOutButton'
 import RatingBadge from '@/components/RatingBadge'
 import ReviewList from '@/components/ReviewList'
+import ProfileRentalsOverview from '@/components/ProfileRentalsOverview'
 import Link from 'next/link'
 
 const ADMIN_USER_ID = 'fabb7245-b2f7-47bb-a0a7-aee2651388f5'
@@ -27,6 +28,20 @@ export default async function ProfilePage() {
     .select('id, title, price_per_day, status, image_urls, reject_reason')
     .eq('owner_id', user.id)
     .order('created_at', { ascending: false })
+
+  const [{ data: ownerBookings }, { data: renterBookings }] = await Promise.all([
+    supabase
+      .from('bookings')
+      .select('id, item_id, status, start_date, end_date, renter:profiles!renter_id(name)')
+      .eq('owner_id', user.id)
+      .in('status', ['pending', 'confirmed', 'active']),
+    supabase
+      .from('bookings')
+      .select('id, status, start_date, end_date, total_amount, item:items(id, title, image_urls), owner:profiles!owner_id(name)')
+      .eq('renter_id', user.id)
+      .in('status', ['pending', 'confirmed', 'active'])
+      .order('created_at', { ascending: false }),
+  ])
 
   const { data: reviews } = await supabase
     .from('reviews')
@@ -115,6 +130,26 @@ export default async function ProfilePage() {
           ))}
         </div>
 
+        <ProfileRentalsOverview
+          myItems={(myItems || []) as {
+            id: string
+            title: string
+            price_per_day: number
+            status: 'draft' | 'moderation' | 'published' | 'archived'
+            image_urls: string[]
+            reject_reason?: string | null
+          }[]}
+          ownerBookings={(ownerBookings || []).map(b => ({
+            ...b,
+            renter: b.renter as unknown as { name: string } | null,
+          }))}
+          renterBookings={(renterBookings || []).map(b => ({
+            ...b,
+            item: b.item as unknown as { id: string; title: string; image_urls: string[] } | null,
+            owner: b.owner as unknown as { name: string } | null,
+          }))}
+        />
+
         {/* Reviews */}
         <div style={{ marginBottom: 24 }}>
           <h2 style={{ color: '#fff', fontWeight: 600, fontSize: 16, marginBottom: 12 }}>
@@ -124,93 +159,6 @@ export default async function ProfilePage() {
             ...r,
             reviewer: r.reviewer as unknown as { id: string; name: string } | null,
           }))} />
-        </div>
-
-        {/* My listings */}
-        <div style={{ marginBottom: 24 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-            <h2 style={{ color: '#fff', fontWeight: 600, fontSize: 16 }}>Мои объявления</h2>
-            <Link href="/create" style={{
-              color: '#7B5CF0', fontSize: 13, fontWeight: 600,
-              display: 'flex', alignItems: 'center', gap: 4,
-            }}>
-              + Добавить
-            </Link>
-          </div>
-
-          {!myItems || myItems.length === 0 ? (
-            <div style={{
-              background: '#1A1A1A', borderRadius: 14,
-              padding: '24px', textAlign: 'center',
-            }}>
-              <p style={{ fontSize: 32, marginBottom: 8 }}>📦</p>
-              <p style={{ color: '#606060', fontSize: 14 }}>Нет объявлений</p>
-              <Link href="/create" className="btn-primary" style={{ marginTop: 12, width: 'auto', padding: '10px 20px', display: 'inline-flex' }}>
-                Сдать вещь
-              </Link>
-            </div>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {myItems.map((item) => {
-                const reject = (item as typeof item & { reject_reason?: string | null }).reject_reason
-                const rowContent = (
-                  <>
-                    <div style={{ width: 48, height: 48, borderRadius: 10, background: '#222', overflow: 'hidden', flexShrink: 0 }}>
-                      {item.image_urls?.[0]
-                        // eslint-disable-next-line @next/next/no-img-element
-                        ? <img src={item.image_urls[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>📦</div>}
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ color: '#fff', fontSize: 14, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {item.title}
-                      </p>
-                      <p style={{ color: '#7B5CF0', fontSize: 13, marginTop: 2 }}>
-                        {item.price_per_day.toLocaleString('ru-RU')} ₽/день
-                      </p>
-                    </div>
-                    <div style={{
-                      padding: '3px 8px', borderRadius: 20, fontSize: 11, flexShrink: 0,
-                      background: item.status === 'published' ? 'rgba(76,175,80,0.15)' : item.status === 'archived' ? 'rgba(255,77,77,0.12)' : 'rgba(255,183,0,0.15)',
-                      color: item.status === 'published' ? '#4CAF50' : item.status === 'archived' ? '#FF4D4D' : '#FFB700',
-                    }}>
-                      {item.status === 'published' ? 'Активно' : item.status === 'moderation' ? 'На проверке' : 'Отклонено'}
-                    </div>
-                  </>
-                )
-                return (
-                  <div key={item.id}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#1A1A1A', borderRadius: 12, padding: '12px' }}>
-                      {item.status === 'published' ? (
-                        <Link href={`/items/${item.id}`} style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1, minWidth: 0 }}>
-                          {rowContent}
-                        </Link>
-                      ) : (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1, minWidth: 0 }}>
-                          {rowContent}
-                        </div>
-                      )}
-                      <Link
-                        href={`/items/${item.id}/edit`}
-                        style={{
-                          flexShrink: 0, padding: '8px 12px', borderRadius: 10,
-                          background: 'rgba(123,92,240,0.15)', border: '1px solid rgba(123,92,240,0.3)',
-                          color: '#7B5CF0', fontSize: 12, fontWeight: 600,
-                        }}
-                      >
-                        ✏️
-                      </Link>
-                    </div>
-                    {item.status === 'archived' && reject && (
-                      <div style={{ background: 'rgba(255,77,77,0.08)', border: '1px solid rgba(255,77,77,0.2)', borderRadius: '0 0 12px 12px', padding: '8px 12px', marginTop: -4 }}>
-                        <p style={{ color: '#FF4D4D', fontSize: 12 }}>✉️ Причина: {reject}</p>
-                      </div>
-                    )}
-                  </div>
-                )
-              })}
-            </div>
-          )}
         </div>
 
         <SignOutButton />
