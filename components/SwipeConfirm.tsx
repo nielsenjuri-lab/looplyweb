@@ -8,6 +8,7 @@ type Props = {
   color?: string
   disabled?: boolean
   onConfirm: () => void | Promise<void>
+  onError?: (message: string) => void
 }
 
 export default function SwipeConfirm({
@@ -16,6 +17,7 @@ export default function SwipeConfirm({
   color = '#7B5CF0',
   disabled = false,
   onConfirm,
+  onError,
 }: Props) {
   const trackRef = useRef<HTMLDivElement>(null)
   const [dragX, setDragX] = useState(0)
@@ -55,8 +57,10 @@ export default function SwipeConfirm({
       try {
         await onConfirm()
         setDone(true)
-      } catch {
+      } catch (e) {
         setDragX(0)
+        const msg = e instanceof Error ? e.message : 'Не удалось сохранить'
+        onError?.(msg)
       } finally {
         setLoading(false)
       }

@@ -23,6 +23,7 @@ import { getOwnerRatings } from '@/lib/ratings'
 import { expandBookingDates } from '@/lib/booking-dates'
 
 import { canSeeContactInfo } from '@/lib/booking-access'
+import { getOwnerPhoneForBooking } from '@/lib/booking-api'
 
 
 
@@ -116,20 +117,16 @@ export default async function ItemPage({ params }: { params: Promise<{ id: strin
 
   let ownerPhone: string | null = null
 
-  if (hasContactAccess) {
-
+  if (hasContactAccess && userBookingId) {
+    const { data: phone } = await getOwnerPhoneForBooking(supabase, userBookingId)
+    ownerPhone = phone ?? null
+  } else if (hasContactAccess && isOwner) {
     const { data: ownerContact } = await supabase
-
       .from('profiles')
-
       .select('phone')
-
       .eq('id', typedItem.owner_id)
-
       .single()
-
     ownerPhone = ownerContact?.phone ?? null
-
   }
 
 

@@ -4,11 +4,8 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import SwipeConfirm from '@/components/SwipeConfirm'
-import {
-  buildPaymentCapturePayload,
-  buildPickupRejectPayload,
-  isHandoverComplete,
-} from '@/lib/booking-handover'
+import { handoverConfirmPickup, handoverRejectPickup } from '@/lib/booking-api'
+import { isHandoverComplete } from '@/lib/booking-handover'
 import type { HandoverBooking } from '@/lib/booking-handover'
 
 type Props = {
@@ -40,31 +37,8 @@ export default function BookingHandover({ booking, role }: Props) {
   async function confirmPickup() {
     setError('')
     const supabase = createClient()
-    const now = new Date().toISOString()
-    const field = role === 'renter' ? 'renter_pickup_confirmed_at' : 'owner_handover_confirmed_at'
-
-    const { error: updateError } = await supabase
-      .from('bookings')
-      .update({ [field]: now })
-      .eq('id', booking.id)
-
-    if (updateError) throw new Error(updateError.message)
-
-    const { data: fresh } = await supabase
-      .from('bookings')
-      .select('renter_pickup_confirmed_at, owner_handover_confirmed_at')
-      .eq('id', booking.id)
-      .single()
-
-    if (fresh?.renter_pickup_confirmed_at && fresh?.owner_handover_confirmed_at) {
-      const { error: activateError } = await supabase
-        .from('bookings')
-        .update(buildPaymentCapturePayload())
-        .eq('id', booking.id)
-
-      if (activateError) throw new Error(activateError.message)
-    }
-
+    const { error: rpcError } = await handoverConfirmPickup(supabase, booking.id)
+    if (rpcError) throw new Error(rpcError.message)
     router.refresh()
   }
 
@@ -82,13 +56,10 @@ export default function BookingHandover({ booking, role }: Props) {
     setLoading(true)
     setError('')
     const supabase = createClient()
-    const { error: rejectError } = await supabase
-      .from('bookings')
-      .update(buildPickupRejectPayload(reason))
-      .eq('id', booking.id)
+    const { error: rpcError } = await handoverRejectPickup(supabase, booking.id, reason)
 
-    if (rejectError) {
-      setError(rejectError.message)
+    if (rpcError) {
+      setError(rpcError.message)
     } else {
       setShowReject(false)
       router.refresh()
@@ -106,9 +77,10 @@ export default function BookingHandover({ booking, role }: Props) {
           🤝 Передача вещи
         </p>
         <p style={{ color: '#A0A0A0', fontSize: 12, lineHeight: 1.5 }}>
-          Осмотрите вещь на встрече. Оба подтверждают свайпом — после этого списываются
-          {' '}{rent.toLocaleString('ru-RU')} ₽ аренды
-          {deposit > 0 ? ` и замораживается депозит ${deposit.toLocaleString('ru-RU')} ₽` : ''}.
+          Осмотрите вещь на встрече. Оба подтверждают свайпом — после этого в приложении
+          {' '}зафиксируется аренда на {rent.toLocaleString('ru-RU')} ₽
+          {deposit > 0 ? ` и депозит ${deposit.toLocaleString('ru-RU')} ₽` : ''}.
+          {' '}Реальное списание с карты подключим позже.
         </p>
       </div>
 
@@ -125,6 +97,7 @@ export default function BookingHandover({ booking, role }: Props) {
                 label="Подтверждаю — забрал вещь"
                 color="#4CAF50"
                 onConfirm={confirmPickup}
+                onError={msg => setError(msg)}
               />
               <button
                 type="button"
@@ -193,6 +166,7 @@ export default function BookingHandover({ booking, role }: Props) {
           color="#5B8AF0"
           disabled={!renterDone}
           onConfirm={confirmPickup}
+          onError={msg => setError(msg)}
         />
       )}
 
@@ -207,11 +181,10 @@ export default function BookingHandover({ booking, role }: Props) {
           background: 'rgba(76,175,80,0.12)', border: '1px solid rgba(76,175,80,0.3)',
           borderRadius: 10, padding: '10px 12px', fontSize: 12, color: '#4CAF50',
         }}>
-          ✓ Оплата зафиксирована · {formatTime(booking.payment_captured_at)}
+          ✓ Аренда активна · {formatTime(booking.payment_captured_at)}
           <br />
           <span style={{ color: '#A0A0A0' }}>
-            {rent.toLocaleString('ru-RU')} ₽ аренда
-            {deposit > 0 ? ` · ${deposit.toLocaleString('ru-RU')} ₽ депозит заморожен` : ''}
+            {rent.toLocaleString('ru-RU')} ₽ · депозит {deposit > 0 ? `${deposit.toLocaleString('ru-RU')} ₽` : 'нет'}
           </span>
         </div>
       )}

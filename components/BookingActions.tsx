@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { bookingStatusAction, type BookingAction } from '@/lib/booking-api'
 import type { BookingStatus } from '@/lib/types'
 
 type Props = {
@@ -16,19 +17,18 @@ export default function BookingActions({ bookingId, status, role, onConfirmed }:
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [confirmReject, setConfirmReject] = useState(false)
+  const [error, setError] = useState('')
 
-  async function updateStatus(next: BookingStatus) {
+  async function runAction(action: BookingAction) {
     setLoading(true)
+    setError('')
     const supabase = createClient()
-    const { error } = await supabase
-      .from('bookings')
-      .update({ status: next })
-      .eq('id', bookingId)
+    const { error: rpcError } = await bookingStatusAction(supabase, bookingId, action)
 
-    if (error) {
-      alert(error.message)
+    if (rpcError) {
+      setError(rpcError.message)
     } else {
-      if (next === 'confirmed') onConfirmed?.(bookingId)
+      if (action === 'owner_confirm') onConfirmed?.(bookingId)
       router.refresh()
     }
     setLoading(false)
@@ -41,7 +41,7 @@ export default function BookingActions({ bookingId, status, role, onConfirmed }:
         <div style={{ display: 'flex', gap: 8 }}>
           <button
             type="button"
-            onClick={() => updateStatus('confirmed')}
+            onClick={() => runAction('owner_confirm')}
             disabled={loading}
             style={{
               flex: 1, padding: '10px', borderRadius: 10,
@@ -56,7 +56,7 @@ export default function BookingActions({ bookingId, status, role, onConfirmed }:
           </button>
           <button
             type="button"
-            onClick={() => confirmReject ? updateStatus('cancelled') : setConfirmReject(true)}
+            onClick={() => confirmReject ? runAction('owner_reject') : setConfirmReject(true)}
             disabled={loading}
             style={{
               flex: 1, padding: '10px', borderRadius: 10,
@@ -70,6 +70,7 @@ export default function BookingActions({ bookingId, status, role, onConfirmed }:
             {confirmReject ? 'Точно отклонить?' : '✕ Отклонить'}
           </button>
         </div>
+        {error && <p style={{ color: '#FF8A8A', fontSize: 12 }}>⚠️ {error}</p>}
       </div>
     )
   }
@@ -79,7 +80,7 @@ export default function BookingActions({ bookingId, status, role, onConfirmed }:
       <div style={{ padding: '0 14px 14px' }}>
         <button
           type="button"
-          onClick={() => updateStatus('completed')}
+          onClick={() => runAction('owner_complete')}
           disabled={loading}
           style={{
             width: '100%', padding: '10px', borderRadius: 10,
@@ -92,6 +93,7 @@ export default function BookingActions({ bookingId, status, role, onConfirmed }:
         >
           ✓ Завершить аренду
         </button>
+        {error && <p style={{ color: '#FF8A8A', fontSize: 12, marginTop: 8 }}>⚠️ {error}</p>}
       </div>
     )
   }
@@ -101,7 +103,7 @@ export default function BookingActions({ bookingId, status, role, onConfirmed }:
       <div style={{ padding: '0 14px 14px' }}>
         <button
           type="button"
-          onClick={() => updateStatus('cancelled')}
+          onClick={() => runAction('renter_cancel')}
           disabled={loading}
           style={{
             width: '100%', padding: '10px', borderRadius: 10,
@@ -114,6 +116,7 @@ export default function BookingActions({ bookingId, status, role, onConfirmed }:
         >
           Отменить заявку
         </button>
+        {error && <p style={{ color: '#FF8A8A', fontSize: 12, marginTop: 8 }}>⚠️ {error}</p>}
       </div>
     )
   }

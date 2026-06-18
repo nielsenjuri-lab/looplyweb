@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import type { Item } from '@/lib/types'
 import { createClient } from '@/lib/supabase/client'
+import { createBookingRequest } from '@/lib/booking-api'
 
 type AvailableSlot = { date: string; time_from: string; time_to: string }
 
@@ -58,7 +59,7 @@ export default function BookingWidget({ item, currentUserId, initialSlots, initi
 }) {
   const router = useRouter()
   const today = new Date()
-  const todayStr = today.toISOString().split('T')[0]
+  const todayStr = formatDate(today.getFullYear(), today.getMonth(), today.getDate())
 
   const [year, setYear] = useState(today.getFullYear())
   const [month, setMonth] = useState(today.getMonth())
@@ -133,16 +134,7 @@ export default function BookingWidget({ item, currentUserId, initialSlots, initi
     setError('')
     try {
       const supabase = createClient()
-      const { error } = await supabase.from('bookings').insert({
-        item_id: item.id,
-        owner_id: item.owner_id,
-        renter_id: currentUserId,
-        start_date: rangeStart,
-        end_date: effectiveEnd,
-        total_amount: totalPrice,
-        deposit_amount: item.deposit,
-        status: 'pending',
-      })
+      const { error } = await createBookingRequest(supabase, item.id, rangeStart, effectiveEnd)
       if (error) throw error
       router.push('/bookings?success=1')
     } catch (e) {
