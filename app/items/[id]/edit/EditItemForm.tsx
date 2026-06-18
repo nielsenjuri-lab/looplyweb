@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { CATEGORIES, SPB_DISTRICTS } from '@/lib/types'
 import BottomNav from '@/components/BottomNav'
 import BackButton from '@/components/BackButton'
+import { moderationFieldsAfterEdit, moderationNotice } from '@/lib/item-moderation'
 
 type ItemData = {
   id: string
@@ -78,10 +79,7 @@ export default function EditItemForm({
       payload.deposit = form.deposit ? parseFloat(form.deposit) : null
     }
 
-    if (item.status === 'archived') {
-      payload.status = 'moderation'
-      payload.reject_reason = null
-    }
+    Object.assign(payload, moderationFieldsAfterEdit(item.status))
 
     const { error: updateError } = await supabase
       .from('items')
@@ -212,12 +210,12 @@ export default function EditItemForm({
           />
         </Field>
 
-        {item.status === 'archived' && (
+        {moderationNotice(item.status) && (
           <div style={{
             background: 'rgba(255,183,0,0.1)', border: '1px solid rgba(255,183,0,0.25)',
-            borderRadius: 12, padding: '12px 14px', fontSize: 13, color: '#FFB700',
+            borderRadius: 12, padding: '12px 14px', fontSize: 13, color: '#FFB700', lineHeight: 1.5,
           }}>
-            После сохранения объявление снова отправится на модерацию.
+            {moderationNotice(item.status)}
           </div>
         )}
 
@@ -235,7 +233,7 @@ export default function EditItemForm({
             background: 'rgba(76,175,80,0.12)', border: '1px solid rgba(76,175,80,0.3)',
             borderRadius: 10, padding: '10px 14px', fontSize: 13, color: '#4CAF50',
           }}>
-            ✓ Изменения сохранены
+            ✓ {item.status === 'published' ? 'Отправлено на проверку' : 'Изменения сохранены'}
           </div>
         )}
 

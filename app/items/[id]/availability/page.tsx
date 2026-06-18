@@ -13,7 +13,7 @@ export default async function AvailabilityPage({ params }: { params: Promise<{ i
 
   const { data: item } = await supabase
     .from('items')
-    .select('id, title, owner_id, pickup_note')
+    .select('id, title, owner_id, pickup_note, status')
     .eq('id', id)
     .single()
 
@@ -57,6 +57,7 @@ export default async function AvailabilityPage({ params }: { params: Promise<{ i
 
       <OwnerAvailabilityEditor
         itemId={id}
+        itemStatus={item.status}
         pickupNote={item.pickup_note || ''}
         initialSlots={initialSlots}
         bookedDates={bookedDates}

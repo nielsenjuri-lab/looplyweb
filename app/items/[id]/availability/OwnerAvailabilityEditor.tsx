@@ -4,15 +4,17 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import AvailabilityCalendar, { type AvailableSlot } from '@/components/AvailabilityCalendar'
+import { moderationFieldsAfterEdit, moderationNotice } from '@/lib/item-moderation'
 
 type Props = {
   itemId: string
+  itemStatus: string
   pickupNote: string
   initialSlots: AvailableSlot[]
   bookedDates: string[]
 }
 
-export default function OwnerAvailabilityEditor({ itemId, pickupNote, initialSlots, bookedDates }: Props) {
+export default function OwnerAvailabilityEditor({ itemId, itemStatus, pickupNote, initialSlots, bookedDates }: Props) {
   const router = useRouter()
   const [slots, setSlots] = useState<AvailableSlot[]>(initialSlots)
   const [note, setNote] = useState(pickupNote)
@@ -27,6 +29,7 @@ export default function OwnerAvailabilityEditor({ itemId, pickupNote, initialSlo
 
     const { error: itemError } = await supabase.from('items').update({
       pickup_note: note || null,
+      ...moderationFieldsAfterEdit(itemStatus),
     }).eq('id', itemId)
 
     if (itemError) {
@@ -83,10 +86,20 @@ export default function OwnerAvailabilityEditor({ itemId, pickupNote, initialSlo
         />
       </div>
 
+      {moderationNotice(itemStatus) && (
+        <div style={{
+          background: 'rgba(255,183,0,0.1)', border: '1px solid rgba(255,183,0,0.25)',
+          borderRadius: 12, padding: '12px 14px', marginBottom: 16,
+          fontSize: 13, color: '#FFB700', lineHeight: 1.5,
+        }}>
+          {moderationNotice(itemStatus)}
+        </div>
+      )}
+
       {error && <p style={{ color: '#FF4D4D', fontSize: 13, marginBottom: 12 }}>{error}</p>}
 
       <button className="btn-primary" onClick={save} disabled={saving}>
-        {saving ? 'Сохраняем...' : saved ? '✓ Сохранено!' : 'Сохранить'}
+        {saving ? 'Сохраняем...' : saved ? (itemStatus === 'published' ? '✓ На проверке!' : '✓ Сохранено!') : 'Сохранить'}
       </button>
     </div>
   )
