@@ -27,10 +27,10 @@ export default async function AdminPage() {
 
   return (
     <div style={{ padding: '24px 16px', maxWidth: 480, margin: '0 auto' }}>
-      <h1 style={{ fontSize: 22, fontWeight: 700, color: '#fff', marginBottom: 4 }}>
+      <h1 style={{ fontSize: 22, fontWeight: 700, color: '#2B2A28', marginBottom: 4 }}>
         Модерация
       </h1>
-      <p style={{ color: '#606060', fontSize: 13, marginBottom: 24 }}>
+      <p style={{ color: '#8C8A86', fontSize: 13, marginBottom: 24 }}>
         {pending?.length ?? 0} ожидают проверки
       </p>
 
@@ -39,8 +39,8 @@ export default async function AdminPage() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 32 }}>
           {pending.map((item) => (
             <div key={item.id} style={{
-              background: '#1A1A1A', borderRadius: 16, overflow: 'hidden',
-              border: '1px solid #2A2A2A',
+              background: '#FFFFFF', borderRadius: 16, overflow: 'hidden',
+              border: '1px solid #E5DDD5',
             }}>
               {/* Image */}
               {item.image_urls?.[0] && (
@@ -53,14 +53,14 @@ export default async function AdminPage() {
               )}
 
               <div style={{ padding: '14px 16px' }}>
-                <p style={{ color: '#fff', fontWeight: 600, fontSize: 16, marginBottom: 4 }}>
+                <p style={{ color: '#2B2A28', fontWeight: 600, fontSize: 16, marginBottom: 4 }}>
                   {item.title}
                 </p>
-                <p style={{ color: '#606060', fontSize: 13, marginBottom: 8 }}>
+                <p style={{ color: '#8C8A86', fontSize: 13, marginBottom: 8 }}>
                   от {(item.owner as { name: string })?.name || 'Пользователь'} · {item.district} · {item.price_per_day} ₽/день
                 </p>
                 {item.description && (
-                  <p style={{ color: '#A0A0A0', fontSize: 13, lineHeight: 1.5, marginBottom: 12 }}>
+                  <p style={{ color: '#8C8A86', fontSize: 13, lineHeight: 1.5, marginBottom: 12 }}>
                     {item.description}
                   </p>
                 )}
@@ -70,7 +70,7 @@ export default async function AdminPage() {
                       // eslint-disable-next-line @next/next/no-img-element
                       <img key={i} src={url} alt="" style={{
                         width: 56, height: 56, borderRadius: 8, objectFit: 'cover',
-                        border: '1px solid #2A2A2A',
+                        border: '1px solid #E5DDD5',
                       }} />
                     ))}
                   </div>
@@ -82,32 +82,32 @@ export default async function AdminPage() {
         </div>
       ) : (
         <div style={{
-          background: '#1A1A1A', borderRadius: 14, padding: '32px',
-          textAlign: 'center', marginBottom: 32,
+          background: '#FAF7F4', borderRadius: 14, padding: '32px',
+          textAlign: 'center', marginBottom: 32, border: '1px solid #E5DDD5',
         }}>
           <p style={{ fontSize: 32, marginBottom: 8 }}>✅</p>
-          <p style={{ color: '#606060' }}>Нет объявлений на модерации</p>
+          <p style={{ color: '#8C8A86' }}>Нет объявлений на модерации</p>
         </div>
       )}
 
       {/* Published items — full management */}
       {published && published.length > 0 && (
         <div>
-          <h2 style={{ color: '#A0A0A0', fontSize: 13, fontWeight: 600, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1 }}>
+          <h2 style={{ color: '#B5AFA9', fontSize: 13, fontWeight: 600, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1 }}>
             Опубликованные объявления
           </h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {published.map((item) => (
               <div key={item.id} style={{
-                background: '#1A1A1A', borderRadius: 14,
-                border: '1px solid #2A2A2A', overflow: 'hidden',
+                background: '#FFFFFF', borderRadius: 14,
+                border: '1px solid #E5DDD5', overflow: 'hidden',
               }}>
                 <div style={{ padding: '12px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ color: '#fff', fontSize: 14, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <p style={{ color: '#2B2A28', fontSize: 14, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {item.title}
                     </p>
-                    <p style={{ color: '#606060', fontSize: 12, marginTop: 2 }}>
+                    <p style={{ color: '#8C8A86', fontSize: 12, marginTop: 2 }}>
                       от {(item.owner as unknown as { name: string })?.name || 'Пользователь'}
                     </p>
                   </div>
@@ -119,7 +119,7 @@ export default async function AdminPage() {
                     Активно
                   </span>
                 </div>
-                <div style={{ borderTop: '1px solid #2A2A2A', padding: '10px 14px', display: 'flex', gap: 8 }}>
+                <div style={{ borderTop: '1px solid #E5DDD5', padding: '10px 14px', display: 'flex', gap: 8 }}>
                   <AdminActions itemId={item.id} mode="published" />
                 </div>
               </div>

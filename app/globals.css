@@ -1,16 +1,16 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #0D0D0D;
-  --bg-card: #1A1A1A;
-  --bg-input: #222222;
-  --primary: #7B5CF0;
-  --primary-dark: #6347D4;
-  --blue: #5B8AF0;
-  --text: #FFFFFF;
-  --text-secondary: #A0A0A0;
-  --text-muted: #606060;
-  --border: #2A2A2A;
+  --bg: #F4EDE3;
+  --bg-card: #FFFFFF;
+  --bg-input: #FAF7F4;
+  --primary: #FF6B4A;
+  --primary-dark: #E55A3A;
+  --secondary: #8FA79A;
+  --text: #2B2A28;
+  --text-secondary: #8C8A86;
+  --text-muted: #B5AFA9;
+  --border: #E5DDD5;
   --error: #FF4D4D;
   --success: #4CAF50;
   --bottom-nav-height: calc(64px + env(safe-area-inset-bottom, 0px));
@@ -25,7 +25,7 @@
 html {
   background: var(--bg);
   color: var(--text);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -39,7 +39,7 @@ body {
 
 .booking-bar-inline {
   border-top: 1px solid var(--border);
-  background: var(--bg);
+  background: var(--bg-card);
   padding: 14px 16px calc(14px + var(--bottom-nav-height));
   display: flex;
   align-items: center;
@@ -49,7 +49,7 @@ body {
 
 .booking-bar-owner {
   border-top: 1px solid var(--border);
-  background: var(--bg);
+  background: var(--bg-card);
   padding: 14px 16px calc(14px + var(--bottom-nav-height));
 }
 

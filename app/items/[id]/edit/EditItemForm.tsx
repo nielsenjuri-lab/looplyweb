@@ -101,13 +101,13 @@ export default function EditItemForm({
     <div style={{ paddingBottom: 100 }}>
       <header style={{
         padding: '16px', display: 'flex', alignItems: 'center', gap: 12,
-        borderBottom: '1px solid #1A1A1A', position: 'sticky', top: 0,
-        background: 'rgba(13,13,13,0.95)', backdropFilter: 'blur(20px)', zIndex: 50,
+        borderBottom: '1px solid #E5DDD5', position: 'sticky', top: 0,
+        background: 'rgba(244,237,227,0.95)', backdropFilter: 'blur(20px)', zIndex: 50,
       }}>
         <BackButton />
         <div>
-          <h1 style={{ fontSize: 17, fontWeight: 700, color: '#fff' }}>Редактировать</h1>
-          <p style={{ fontSize: 12, color: '#606060', marginTop: 1 }}>{item.title}</p>
+          <h1 style={{ fontSize: 17, fontWeight: 700, color: '#2B2A28' }}>Редактировать</h1>
+          <p style={{ fontSize: 12, color: '#8C8A86', marginTop: 1 }}>{item.title}</p>
         </div>
       </header>
 

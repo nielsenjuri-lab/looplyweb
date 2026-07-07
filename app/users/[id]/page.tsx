@@ -54,22 +54,22 @@ export default async function UserProfilePage({ params }: { params: Promise<{ id
   return (
     <div style={{ paddingBottom: 80 }}>
       <header style={{
-        padding: '16px', borderBottom: '1px solid #1A1A1A',
+        padding: '16px', borderBottom: '1px solid #E5DDD5',
         display: 'flex', alignItems: 'center', gap: 12,
       }}>
         <BackButton />
-        <h1 style={{ fontSize: 18, fontWeight: 700, color: '#fff' }}>Профиль</h1>
+        <h1 style={{ fontSize: 18, fontWeight: 700, color: '#2B2A28' }}>Профиль</h1>
       </header>
 
       <div style={{ padding: '20px 16px' }}>
         <div style={{
           display: 'flex', alignItems: 'center', gap: 14,
-          background: '#1A1A1A', borderRadius: 16, padding: '16px',
+          background: '#FFFFFF', borderRadius: 16, padding: '16px', border: '1px solid #E5DDD5',
           marginBottom: 20,
         }}>
           <div style={{
             width: 64, height: 64, borderRadius: '50%',
-            background: 'linear-gradient(135deg, #7B5CF0, #5B8AF0)',
+            background: '#FF6B4A',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: 26, flexShrink: 0, overflow: 'hidden',
           }}>
@@ -80,28 +80,28 @@ export default async function UserProfilePage({ params }: { params: Promise<{ id
           </div>
           <div style={{ flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-              <p style={{ color: '#fff', fontWeight: 700, fontSize: 18 }}>
+              <p style={{ color: '#2B2A28', fontWeight: 700, fontSize: 18 }}>
                 {displayProfile.name || 'Пользователь'}
               </p>
               {profile.is_verified && (
-                <span style={{ color: '#7B5CF0', fontSize: 12 }}>✓ Верифицирован</span>
+                <span style={{ color: '#8FA79A', fontSize: 12 }}>✓ Верифицирован</span>
               )}
             </div>
             {displayProfile.district && (
-              <p style={{ color: '#606060', fontSize: 13, marginTop: 4 }}>📍 {displayProfile.district}</p>
+              <p style={{ color: '#8C8A86', fontSize: 13, marginTop: 4 }}>📍 {displayProfile.district}</p>
             )}
             <div style={{ marginTop: 8 }}>
               {displayProfile.review_count > 0 ? (
                 <RatingBadge rating={displayProfile.rating} reviewCount={displayProfile.review_count} size="md" />
               ) : (
-                <span style={{ color: '#606060', fontSize: 13 }}>Новый пользователь</span>
+                <span style={{ color: '#8C8A86', fontSize: 13 }}>Новый пользователь</span>
               )}
             </div>
           </div>
         </div>
 
         <div style={{ marginBottom: 24 }}>
-          <h2 style={{ color: '#fff', fontWeight: 600, fontSize: 16, marginBottom: 12 }}>
+          <h2 style={{ color: '#2B2A28', fontWeight: 600, fontSize: 16, marginBottom: 12 }}>
             Отзывы {displayProfile.review_count > 0 && `(${displayProfile.review_count})`}
           </h2>
           <ReviewList reviews={reviewRows} />
@@ -109,7 +109,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{ id
 
         {items && items.length > 0 && (
           <div>
-            <h2 style={{ color: '#fff', fontWeight: 600, fontSize: 16, marginBottom: 12 }}>
+            <h2 style={{ color: '#2B2A28', fontWeight: 600, fontSize: 16, marginBottom: 12 }}>
               Объявления
             </h2>
             <div style={{

@@ -65,9 +65,9 @@ export default async function BookingsPage({
 
   return (
     <div style={{ paddingBottom: 80 }}>
-      <header style={{ padding: '20px 16px 16px', borderBottom: '1px solid #1A1A1A' }}>
-        <h1 style={{ fontSize: 20, fontWeight: 700, color: '#fff' }}>Аренды</h1>
-        <p style={{ color: '#606060', fontSize: 13, marginTop: 4 }}>
+      <header style={{ padding: '20px 16px 16px', borderBottom: '1px solid #E5DDD5' }}>
+        <h1 style={{ fontSize: 20, fontWeight: 700, color: '#2B2A28' }}>Аренды</h1>
+        <p style={{ color: '#8C8A86', fontSize: 13, marginTop: 4 }}>
           Ваши заявки и запросы на ваши вещи
         </p>
       </header>

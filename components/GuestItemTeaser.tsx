@@ -18,15 +18,15 @@ export default function GuestItemTeaser({ description, owner }: Props) {
     <>
       {text && (
         <div style={{ marginBottom: 20 }}>
-          <h2 style={{ color: '#fff', fontWeight: 600, fontSize: 16, marginBottom: 8 }}>Описание</h2>
-          <p style={{ color: '#A0A0A0', fontSize: 14, lineHeight: 1.6 }}>
+          <h2 style={{ color: '#2B2A28', fontWeight: 600, fontSize: 16, marginBottom: 8 }}>Описание</h2>
+          <p style={{ color: '#8C8A86', fontSize: 14, lineHeight: 1.6 }}>
             {preview}
             {hasMore && (
               <>
                 {' '}
                 <Link
                   href="/auth"
-                  style={{ color: '#7B5CF0', fontWeight: 600, textDecoration: 'none' }}
+                  style={{ color: '#FF6B4A', fontWeight: 600, textDecoration: 'none' }}
                 >
                   ещё
                 </Link>
@@ -38,8 +38,8 @@ export default function GuestItemTeaser({ description, owner }: Props) {
 
       {owner && (
         <div style={{
-          background: '#1A1A1A',
-          borderRadius: 14,
+          background: '#FAF7F4',
+          borderRadius: 14, border: '1px solid #E5DDD5',
           padding: '14px 16px',
           display: 'flex',
           alignItems: 'center',
@@ -48,7 +48,7 @@ export default function GuestItemTeaser({ description, owner }: Props) {
         }}>
           <div style={{
             width: 44, height: 44, borderRadius: '50%',
-            background: 'linear-gradient(135deg, #7B5CF0, #5B8AF0)',
+            background: '#FF6B4A',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: 18, flexShrink: 0,
           }}>
@@ -59,11 +59,11 @@ export default function GuestItemTeaser({ description, owner }: Props) {
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-              <span style={{ color: '#fff', fontWeight: 600, fontSize: 14 }}>
+              <span style={{ color: '#2B2A28', fontWeight: 600, fontSize: 14 }}>
                 {owner.name || 'Пользователь'}
               </span>
               {owner.is_verified && (
-                <span style={{ color: '#7B5CF0', fontSize: 12 }}>✓ Верифицирован</span>
+                <span style={{ color: '#8FA79A', fontSize: 12 }}>✓ Верифицирован</span>
               )}
             </div>
             {owner.review_count > 0 ? (
@@ -71,12 +71,12 @@ export default function GuestItemTeaser({ description, owner }: Props) {
                 <RatingBadge rating={owner.rating} reviewCount={owner.review_count} />
               </div>
             ) : (
-              <p style={{ color: '#606060', fontSize: 12, marginTop: 2 }}>Новый пользователь</p>
+              <p style={{ color: '#8C8A86', fontSize: 12, marginTop: 2 }}>Новый пользователь</p>
             )}
             {owner.review_count > 0 && (
-              <p style={{ color: '#606060', fontSize: 11, marginTop: 6 }}>
+              <p style={{ color: '#8C8A86', fontSize: 11, marginTop: 6 }}>
                 Отзывы — после{' '}
-                <Link href="/auth" style={{ color: '#7B5CF0', fontWeight: 500, textDecoration: 'none' }}>
+                <Link href="/auth" style={{ color: '#FF6B4A', fontWeight: 500, textDecoration: 'none' }}>
                   регистрации
                 </Link>
               </p>

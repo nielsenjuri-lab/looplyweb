@@ -159,7 +159,7 @@ export default async function ItemPage({ params }: { params: Promise<{ id: strin
 
           aspectRatio: '4/3',
 
-          background: '#1A1A1A',
+          background: '#EFE8E0',
 
           overflow: 'hidden',
 
@@ -267,7 +267,7 @@ export default async function ItemPage({ params }: { params: Promise<{ id: strin
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }}>
 
-            <span style={{ fontSize: 24, fontWeight: 700, color: '#7B5CF0' }}>
+            <span style={{ fontSize: 24, fontWeight: 700, color: '#FF6B4A' }}>
 
               {typedItem.price_per_day.toLocaleString('ru-RU')} ₽
 
@@ -316,7 +316,7 @@ export default async function ItemPage({ params }: { params: Promise<{ id: strin
 
               <div style={{
 
-                background: '#1A1A1A',
+                background: '#FAF7F4',
 
                 borderRadius: 12,
 
@@ -418,7 +418,7 @@ export default async function ItemPage({ params }: { params: Promise<{ id: strin
 
               <Link href={`/users/${typedItem.owner.id}`} style={{
 
-                background: '#1A1A1A',
+                background: '#FAF7F4',
 
                 borderRadius: 14,
 
@@ -436,7 +436,7 @@ export default async function ItemPage({ params }: { params: Promise<{ id: strin
 
                   width: 44, height: 44, borderRadius: '50%',
 
-                  background: 'linear-gradient(135deg, #7B5CF0, #5B8AF0)',
+                  background: '#FF6B4A',
 
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
 
@@ -466,7 +466,7 @@ export default async function ItemPage({ params }: { params: Promise<{ id: strin
 
                     {typedItem.owner.is_verified && (
 
-                      <span style={{ color: '#7B5CF0', fontSize: 12 }}>✓ Верифицирован</span>
+                      <span style={{ color: '#8FA79A', fontSize: 12 }}>✓ Верифицирован</span>
 
                     )}
 

@@ -151,9 +151,9 @@ export default function BookingWidget({ item, currentUserId, initialSlots, initi
     return (
       <div className="booking-bar-owner">
         <div style={{
-          background: 'rgba(123,92,240,0.1)', border: '1px solid rgba(123,92,240,0.2)',
+          background: 'rgba(255,107,74,0.08)', border: '1px solid rgba(255,107,74,0.2)',
           borderRadius: 12, padding: '10px 14px', marginBottom: 10,
-          fontSize: 13, color: '#A0A0A0', textAlign: 'center',
+          fontSize: 13, color: '#8C8A86', textAlign: 'center',
         }}>
           Это ваше объявление
         </div>
@@ -175,11 +175,11 @@ export default function BookingWidget({ item, currentUserId, initialSlots, initi
     return (
       <div className="booking-bar-inline">
         <div>
-          <div style={{ color: '#fff', fontWeight: 700, fontSize: 18 }}>
+          <div style={{ color: '#2B2A28', fontWeight: 700, fontSize: 18 }}>
             {item.price_per_day.toLocaleString('ru-RU')} ₽
-            <span style={{ color: '#606060', fontSize: 13, fontWeight: 400 }}>/день</span>
+            <span style={{ color: '#8C8A86', fontSize: 13, fontWeight: 400 }}>/день</span>
           </div>
-          <div style={{ color: '#606060', fontSize: 12 }}>Выберите даты после входа</div>
+          <div style={{ color: '#8C8A86', fontSize: 12 }}>Выберите даты после входа</div>
         </div>
         <button
           className="btn-primary"
@@ -217,8 +217,8 @@ export default function BookingWidget({ item, currentUserId, initialSlots, initi
         bottom: sheetOpen ? 'var(--bottom-nav-height)' : -600,
         left: '50%', transform: 'translateX(-50%)',
         width: '100%', maxWidth: 480,
-        background: '#111',
-        borderTop: '1px solid #2A2A2A',
+        background: '#FFFFFF',
+        borderTop: '1px solid #E5DDD5',
         borderRadius: '20px 20px 0 0',
         padding: '8px 16px 20px',
         zIndex: 92,
@@ -228,36 +228,36 @@ export default function BookingWidget({ item, currentUserId, initialSlots, initi
       }}>
         {/* Drag handle */}
         <div style={{ display: 'flex', justifyContent: 'center', paddingBottom: 12 }}>
-          <div style={{ width: 40, height: 4, borderRadius: 2, background: '#333' }} />
+          <div style={{ width: 40, height: 4, borderRadius: 2, background: '#E5DDD5' }} />
         </div>
 
         {/* Title + close */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-          <span style={{ color: '#fff', fontWeight: 700, fontSize: 16 }}>Выберите даты</span>
+          <span style={{ color: '#2B2A28', fontWeight: 700, fontSize: 16 }}>Выберите даты</span>
           <button
             type="button"
             onClick={() => setSheetOpen(false)}
-            style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: 8, padding: '4px 10px', color: '#A0A0A0', fontSize: 16, cursor: 'pointer' }}
+            style={{ background: '#FAF7F4', border: '1px solid #E5DDD5', borderRadius: 8, padding: '4px 10px', color: '#8C8A86', fontSize: 16, cursor: 'pointer' }}
           >✕</button>
         </div>
 
         {/* Calendar header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
           <button type="button" onClick={() => { if (month === 0) { setYear(y=>y-1); setMonth(11) } else setMonth(m=>m-1) }}
-            style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: 8, padding: '4px 12px', color: '#fff', fontSize: 16, cursor: 'pointer' }}>‹</button>
-          <span style={{ color: '#fff', fontWeight: 600, fontSize: 14 }}>{MONTH_NAMES[month]} {year}</span>
+            style={{ background: '#FAF7F4', border: '1px solid #E5DDD5', borderRadius: 8, padding: '4px 12px', color: '#2B2A28', fontSize: 16, cursor: 'pointer' }}>‹</button>
+          <span style={{ color: '#2B2A28', fontWeight: 600, fontSize: 14 }}>{MONTH_NAMES[month]} {year}</span>
           <button type="button" onClick={() => { if (month === 11) { setYear(y=>y+1); setMonth(0) } else setMonth(m=>m+1) }}
-            style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: 8, padding: '4px 12px', color: '#fff', fontSize: 16, cursor: 'pointer' }}>›</button>
+            style={{ background: '#FAF7F4', border: '1px solid #E5DDD5', borderRadius: 8, padding: '4px 12px', color: '#2B2A28', fontSize: 16, cursor: 'pointer' }}>›</button>
         </div>
 
-        <p style={{ color: '#606060', fontSize: 12, marginBottom: 10, lineHeight: 1.4 }}>
+        <p style={{ color: '#8C8A86', fontSize: 12, marginBottom: 10, lineHeight: 1.4 }}>
           Нажмите день начала, затем день окончания. До {MAX_RENT_DAYS} дней подряд.
         </p>
 
         {/* Day headers */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 3, marginBottom: 3 }}>
           {DAY_NAMES.map(d => (
-            <div key={d} style={{ textAlign: 'center', fontSize: 10, color: '#606060' }}>{d}</div>
+            <div key={d} style={{ textAlign: 'center', fontSize: 10, color: '#B5AFA9' }}>{d}</div>
           ))}
         </div>
 
@@ -282,13 +282,13 @@ export default function BookingWidget({ item, currentUserId, initialSlots, initi
                   aspectRatio: '1',
                   borderRadius: 8,
                   fontSize: 12,
-                  border: (isStart || isEnd) ? '2px solid #7B5CF0' : inRange ? '1px solid rgba(123,92,240,0.4)' : '1px solid transparent',
+                  border: (isStart || isEnd) ? '2px solid #FF6B4A' : inRange ? '1px solid rgba(255,107,74,0.4)' : '1px solid transparent',
                   background: inRange
-                    ? 'rgba(123,92,240,0.3)'
+                    ? 'rgba(255,107,74,0.18)'
                     : available
-                    ? 'rgba(76,175,80,0.15)'
-                    : isBooked ? 'rgba(255,77,77,0.1)' : '#1A1A1A',
-                  color: inRange ? '#7B5CF0' : available ? '#4CAF50' : '#333',
+                    ? 'rgba(143,167,154,0.15)'
+                    : isBooked ? 'rgba(255,77,77,0.08)' : '#F4EDE3',
+                  color: inRange ? '#FF6B4A' : available ? '#8FA79A' : '#B5AFA9',
                   cursor: available ? 'pointer' : 'not-allowed',
                 }}
               >
@@ -299,33 +299,33 @@ export default function BookingWidget({ item, currentUserId, initialSlots, initi
         </div>
 
         {/* Legend */}
-        <div style={{ display: 'flex', gap: 12, marginBottom: 12, fontSize: 11, color: '#606060' }}>
+        <div style={{ display: 'flex', gap: 12, marginBottom: 12, fontSize: 11, color: '#8C8A86' }}>
           <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            <span style={{ width: 8, height: 8, borderRadius: 2, background: 'rgba(76,175,80,0.3)', display: 'inline-block' }} /> Доступно
+            <span style={{ width: 8, height: 8, borderRadius: 2, background: 'rgba(143,167,154,0.35)', display: 'inline-block' }} /> Доступно
           </span>
           <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            <span style={{ width: 8, height: 8, borderRadius: 2, background: '#1A1A1A', border: '1px solid #2A2A2A', display: 'inline-block' }} /> Недоступно
+            <span style={{ width: 8, height: 8, borderRadius: 2, background: '#F4EDE3', border: '1px solid #E5DDD5', display: 'inline-block' }} /> Недоступно
           </span>
         </div>
 
         {/* Selected range info */}
         {rangeStart && (
           <div style={{
-            background: 'rgba(123,92,240,0.1)', border: '1px solid rgba(123,92,240,0.2)',
+            background: 'rgba(255,107,74,0.07)', border: '1px solid rgba(255,107,74,0.2)',
             borderRadius: 10, padding: '8px 12px', marginBottom: 12, fontSize: 13,
           }}>
-            <span style={{ color: '#A0A0A0' }}>
+            <span style={{ color: '#8C8A86' }}>
               📅 {formatRangeLabel(rangeStart, effectiveEnd)}
               {selectedSlot && (
                 <> · 🕐 {selectedSlot.time_from.slice(0, 5)} — {slotMap.get(effectiveEnd)?.time_to.slice(0, 5) || selectedSlot.time_to.slice(0, 5)}</>
               )}
             </span>
             {!rangeEnd && (
-              <p style={{ color: '#606060', fontSize: 11, marginTop: 4 }}>
+              <p style={{ color: '#B5AFA9', fontSize: 11, marginTop: 4 }}>
                 1 день — можно сразу запросить. Для периода выберите день окончания.
               </p>
             )}
-            <p style={{ color: '#7B5CF0', fontSize: 13, fontWeight: 600, marginTop: 6 }}>
+            <p style={{ color: '#FF6B4A', fontSize: 13, fontWeight: 600, marginTop: 6 }}>
               Итого: {totalPrice.toLocaleString('ru-RU')} ₽
             </p>
           </div>
@@ -347,17 +347,17 @@ export default function BookingWidget({ item, currentUserId, initialSlots, initi
       {/* Booking bar — в потоке страницы, не перекрывает контент */}
       <div className="booking-bar-inline">
         <div>
-          <div style={{ color: '#fff', fontWeight: 700, fontSize: 18 }}>
+          <div style={{ color: '#2B2A28', fontWeight: 700, fontSize: 18 }}>
             {item.price_per_day.toLocaleString('ru-RU')} ₽
-            <span style={{ color: '#606060', fontSize: 13, fontWeight: 400 }}>/день</span>
+            <span style={{ color: '#8C8A86', fontSize: 13, fontWeight: 400 }}>/день</span>
           </div>
           {rangeStart ? (
-            <div style={{ color: '#7B5CF0', fontSize: 12 }}>
+            <div style={{ color: '#FF6B4A', fontSize: 12 }}>
               📅 {formatRangeLabel(rangeStart, effectiveEnd)}
               {rangeComplete && ` · ${totalPrice.toLocaleString('ru-RU')} ₽`}
             </div>
           ) : (
-            <div style={{ color: '#606060', fontSize: 12 }}>Даты не выбраны</div>
+            <div style={{ color: '#8C8A86', fontSize: 12 }}>Даты не выбраны</div>
           )}
         </div>
 
@@ -367,9 +367,9 @@ export default function BookingWidget({ item, currentUserId, initialSlots, initi
               type="button"
               onClick={() => setSheetOpen(true)}
               style={{
-                background: '#1A1A1A', border: '1px solid #2A2A2A',
+                background: '#FAF7F4', border: '1px solid #E5DDD5',
                 borderRadius: 12, padding: '10px 14px',
-                color: '#A0A0A0', fontSize: 13, cursor: 'pointer',
+                color: '#8C8A86', fontSize: 13, cursor: 'pointer',
               }}
             >
               Изменить

@@ -48,7 +48,7 @@ export default function AuthPage() {
         <div style={{
           width: 56, height: 56,
           borderRadius: 18,
-          background: 'linear-gradient(135deg, #7B5CF0, #5B8AF0)',
+          background: '#FF6B4A',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           margin: '0 auto 16px',
         }}>
@@ -57,14 +57,14 @@ export default function AuthPage() {
               stroke="white" strokeWidth="1.8" strokeLinecap="round"/>
           </svg>
         </div>
-        <h1 style={{ fontSize: 26, fontWeight: 700, color: '#fff', letterSpacing: '-0.5px' }}>looply</h1>
-        <p style={{ color: '#606060', fontSize: 14, marginTop: 4 }}>Аренда вещей в Петербурге</p>
+        <h1 style={{ fontSize: 26, fontWeight: 700, color: '#2B2A28', letterSpacing: '-0.5px' }}>looply</h1>
+        <p style={{ color: '#8C8A86', fontSize: 14, marginTop: 4 }}>Аренда вещей в Петербурге</p>
       </div>
 
       {/* Toggle */}
       <div style={{
         display: 'flex',
-        background: '#1A1A1A',
+        background: '#EFE8E0',
         borderRadius: 14,
         padding: 4,
         marginBottom: 28,
@@ -79,8 +79,8 @@ export default function AuthPage() {
               borderRadius: 10,
               fontSize: 14,
               fontWeight: 600,
-              background: isLogin === (i === 0) ? '#7B5CF0' : 'transparent',
-              color: isLogin === (i === 0) ? '#fff' : '#606060',
+              background: isLogin === (i === 0) ? '#FF6B4A' : 'transparent',
+              color: isLogin === (i === 0) ? '#fff' : '#8C8A86',
               transition: 'all 0.2s',
             }}
           >
@@ -128,7 +128,7 @@ export default function AuthPage() {
       </form>
 
       <div style={{ marginTop: 24, textAlign: 'center' }}>
-        <Link href="/" style={{ color: '#606060', fontSize: 14 }}>
+        <Link href="/" style={{ color: '#8C8A86', fontSize: 14 }}>
           Смотреть каталог без входа →
         </Link>
       </div>

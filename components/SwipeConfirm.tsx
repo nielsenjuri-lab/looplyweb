@@ -14,7 +14,7 @@ type Props = {
 export default function SwipeConfirm({
   label,
   hint = 'Смахните вправо →',
-  color = '#7B5CF0',
+  color = '#FF6B4A',
   disabled = false,
   onConfirm,
   onError,
@@ -87,14 +87,14 @@ export default function SwipeConfirm({
         ref={trackRef}
         style={{
           position: 'relative', height: 52, borderRadius: 14,
-          background: '#1A1A1A', border: `1px solid ${color}44`,
+          background: '#FAF7F4', border: `1px solid ${color}44`,
           overflow: 'hidden', opacity: disabled ? 0.5 : 1,
           touchAction: 'none', userSelect: 'none',
         }}
       >
         <div style={{
           position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
-          color: '#606060', fontSize: 13, fontWeight: 500, pointerEvents: 'none',
+          color: '#8C8A86', fontSize: 13, fontWeight: 500, pointerEvents: 'none',
         }}>
           {loading ? 'Сохраняем...' : label}
         </div>

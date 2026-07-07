@@ -8,8 +8,8 @@ export default function ReviewList({ reviews }: { reviews: ReviewRow[] }) {
   if (!reviews.length) {
     return (
       <div style={{
-        background: '#1A1A1A', borderRadius: 12, padding: '20px',
-        textAlign: 'center', color: '#606060', fontSize: 14,
+        background: '#FAF7F4', borderRadius: 12, padding: '20px',
+        textAlign: 'center', color: '#8C8A86', fontSize: 14,
       }}>
         Пока нет отзывов
       </div>
@@ -20,10 +20,10 @@ export default function ReviewList({ reviews }: { reviews: ReviewRow[] }) {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       {reviews.map((review) => (
         <div key={review.id} style={{
-          background: '#1A1A1A', borderRadius: 12, padding: '12px 14px',
+          background: '#FFFFFF', borderRadius: 12, padding: '12px 14px', border: '1px solid #E5DDD5',
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-            <span style={{ color: '#fff', fontSize: 13, fontWeight: 500 }}>
+            <span style={{ color: '#2B2A28', fontSize: 13, fontWeight: 500 }}>
               {review.reviewer?.name || 'Пользователь'}
             </span>
             <span style={{ color: '#FFB800', fontSize: 13, letterSpacing: 1 }}>
@@ -31,9 +31,9 @@ export default function ReviewList({ reviews }: { reviews: ReviewRow[] }) {
             </span>
           </div>
           {review.comment && (
-            <p style={{ color: '#A0A0A0', fontSize: 13, lineHeight: 1.5 }}>{review.comment}</p>
+            <p style={{ color: '#8C8A86', fontSize: 13, lineHeight: 1.5 }}>{review.comment}</p>
           )}
-          <p style={{ color: '#606060', fontSize: 11, marginTop: review.comment ? 6 : 0 }}>
+          <p style={{ color: '#B5AFA9', fontSize: 11, marginTop: review.comment ? 6 : 0 }}>
             {new Date(review.created_at).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })}
           </p>
         </div>

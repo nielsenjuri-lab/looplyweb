@@ -37,7 +37,7 @@ export default function ContactReveal({
 
     return (
       <div style={{ marginBottom: 20 }}>
-        <h2 style={{ color: '#fff', fontWeight: 600, fontSize: 16, marginBottom: 10 }}>
+        <h2 style={{ color: '#2B2A28', fontWeight: 600, fontSize: 16, marginBottom: 10 }}>
           {isOwner ? 'Контакты для арендаторов' : 'Контакты для встречи'}
         </h2>
         <div style={{
@@ -59,10 +59,10 @@ export default function ContactReveal({
             <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
               <span style={{ fontSize: 18 }}>📞</span>
               <div>
-                <p style={{ color: '#606060', fontSize: 11, marginBottom: 2 }}>Телефон</p>
+                <p style={{ color: '#8C8A86', fontSize: 11, marginBottom: 2 }}>Телефон</p>
                 <a
                   href={`tel:${phone.replace(/\s/g, '')}`}
-                  style={{ color: '#fff', fontSize: 15, fontWeight: 600, textDecoration: 'none' }}
+                  style={{ color: '#2B2A28', fontSize: 15, fontWeight: 600, textDecoration: 'none' }}
                 >
                   {formatPhone(phone)}
                 </a>
@@ -82,9 +82,9 @@ export default function ContactReveal({
             <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
               <span style={{ fontSize: 18 }}>📍</span>
               <div>
-                <p style={{ color: '#606060', fontSize: 11, marginBottom: 2 }}>Место встречи</p>
+                <p style={{ color: '#8C8A86', fontSize: 11, marginBottom: 2 }}>Место встречи</p>
                 {pickupNote && (
-                  <p style={{ color: '#fff', fontSize: 14, lineHeight: 1.5 }}>{pickupNote}</p>
+                  <p style={{ color: '#2B2A28', fontSize: 14, lineHeight: 1.5 }}>{pickupNote}</p>
                 )}
                 {pickupHours && (
                   <p style={{ color: '#A0A0A0', fontSize: 13, marginTop: pickupNote ? 4 : 0 }}>
@@ -107,9 +107,9 @@ export default function ContactReveal({
               style={{
                 display: 'block', textAlign: 'center', marginTop: 4,
                 padding: '11px', borderRadius: 10,
-                background: 'rgba(123,92,240,0.18)',
-                border: '1px solid rgba(123,92,240,0.35)',
-                color: '#B89CFF', fontWeight: 600, fontSize: 13, textDecoration: 'none',
+                background: 'rgba(255,107,74,0.08)',
+                border: '1px solid rgba(255,107,74,0.3)',
+                color: '#FF6B4A', fontWeight: 600, fontSize: 13, textDecoration: 'none',
               }}
             >
               💬 Открыть чат
@@ -134,7 +134,7 @@ export default function ContactReveal({
         href="/auth"
         style={{
           display: 'inline-block', marginTop: 12,
-          color: '#7B5CF0', fontSize: 13, fontWeight: 600, textDecoration: 'none',
+          color: '#FF6B4A', fontSize: 13, fontWeight: 600, textDecoration: 'none',
         }}
       >
         Войти →
@@ -149,7 +149,7 @@ export default function ContactReveal({
         href="/bookings"
         style={{
           display: 'inline-block', marginTop: 12,
-          color: '#7B5CF0', fontSize: 13, fontWeight: 600, textDecoration: 'none',
+          color: '#FF6B4A', fontSize: 13, fontWeight: 600, textDecoration: 'none',
         }}
       >
         Мои бронирования →
@@ -161,17 +161,17 @@ export default function ContactReveal({
 
   return (
     <div style={{ marginBottom: 20 }}>
-      <h2 style={{ color: '#fff', fontWeight: 600, fontSize: 16, marginBottom: 10 }}>Контакты</h2>
+      <h2 style={{ color: '#2B2A28', fontWeight: 600, fontSize: 16, marginBottom: 10 }}>Контакты</h2>
       <div style={{
-        background: '#1A1A1A',
-        border: '1px solid #2A2A2A',
+        background: '#FFFFFF',
+        border: '1px solid #E5DDD5',
         borderRadius: 14,
         padding: '16px',
         textAlign: 'center',
       }}>
         <div style={{ fontSize: 28, marginBottom: 8 }}>{icon}</div>
-        <p style={{ color: '#fff', fontWeight: 600, fontSize: 14, marginBottom: 6 }}>{title}</p>
-        <p style={{ color: '#606060', fontSize: 13, lineHeight: 1.5 }}>{description}</p>
+        <p style={{ color: '#2B2A28', fontWeight: 600, fontSize: 14, marginBottom: 6 }}>{title}</p>
+        <p style={{ color: '#8C8A86', fontSize: 13, lineHeight: 1.5 }}>{description}</p>
         {action}
       </div>
     </div>

@@ -98,15 +98,15 @@ export default function AvailabilityCalendar({ value, onChange, bookedDates = []
     <div>
       {/* Global time setting */}
       <div style={{
-        background: '#1A1A1A', borderRadius: 14, padding: '14px 16px', marginBottom: 16,
-        border: '1px solid #2A2A2A',
+        background: '#FFFFFF', borderRadius: 14, padding: '14px 16px', marginBottom: 16,
+        border: '1px solid #E5DDD5',
       }}>
-        <p style={{ color: '#fff', fontSize: 13, fontWeight: 600, marginBottom: 10 }}>
+        <p style={{ color: '#2B2A28', fontSize: 13, fontWeight: 600, marginBottom: 10 }}>
           🕐 Время выдачи для всех дней
         </p>
         <div style={{ display: 'flex', gap: 10, alignItems: 'flex-end' }}>
           <div style={{ flex: 1 }}>
-            <label style={{ display: 'block', fontSize: 11, color: '#606060', marginBottom: 4 }}>С</label>
+            <label style={{ display: 'block', fontSize: 11, color: '#8C8A86', marginBottom: 4 }}>С</label>
             <input
               type="time"
               value={globalTimeFrom}
@@ -115,7 +115,7 @@ export default function AvailabilityCalendar({ value, onChange, bookedDates = []
             />
           </div>
           <div style={{ flex: 1 }}>
-            <label style={{ display: 'block', fontSize: 11, color: '#606060', marginBottom: 4 }}>До</label>
+            <label style={{ display: 'block', fontSize: 11, color: '#8C8A86', marginBottom: 4 }}>До</label>
             <input
               type="time"
               value={globalTimeTo}
@@ -127,10 +127,10 @@ export default function AvailabilityCalendar({ value, onChange, bookedDates = []
             type="button"
             onClick={applyGlobalTime}
             style={{
-              background: applied ? 'rgba(76,175,80,0.2)' : 'rgba(123,92,240,0.15)',
-              border: `1px solid ${applied ? 'rgba(76,175,80,0.4)' : 'rgba(123,92,240,0.3)'}`,
+              background: applied ? 'rgba(76,175,80,0.12)' : 'rgba(255,107,74,0.08)',
+              border: `1px solid ${applied ? 'rgba(76,175,80,0.35)' : 'rgba(255,107,74,0.3)'}`,
               borderRadius: 10, padding: '10px 12px',
-              color: applied ? '#4CAF50' : '#7B5CF0',
+              color: applied ? '#4CAF50' : '#FF6B4A',
               fontSize: 12, fontWeight: 600,
               cursor: 'pointer',
               transition: 'all 0.2s',
@@ -164,7 +164,7 @@ export default function AvailabilityCalendar({ value, onChange, bookedDates = []
             onChange={(e) => setUseIndividualTime(e.target.checked)}
             style={{ width: 'auto' }}
           />
-          <span style={{ color: '#A0A0A0', fontSize: 12 }}>Разное время для каждого дня</span>
+          <span style={{ color: '#8C8A86', fontSize: 12 }}>Разное время для каждого дня</span>
         </label>
       </div>
 
@@ -173,22 +173,22 @@ export default function AvailabilityCalendar({ value, onChange, bookedDates = []
         <button
           type="button"
           onClick={prevMonth}
-          style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: 10, padding: '6px 16px', color: '#fff', fontSize: 18, cursor: 'pointer' }}
+          style={{ background: '#FAF7F4', border: '1px solid #E5DDD5', borderRadius: 10, padding: '6px 16px', color: '#2B2A28', fontSize: 18, cursor: 'pointer' }}
         >‹</button>
-        <span style={{ color: '#fff', fontWeight: 600, fontSize: 15 }}>
+        <span style={{ color: '#2B2A28', fontWeight: 600, fontSize: 15 }}>
           {MONTH_NAMES[month]} {year}
         </span>
         <button
           type="button"
           onClick={nextMonth}
-          style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: 10, padding: '6px 16px', color: '#fff', fontSize: 18, cursor: 'pointer' }}
+          style={{ background: '#FAF7F4', border: '1px solid #E5DDD5', borderRadius: 10, padding: '6px 16px', color: '#2B2A28', fontSize: 18, cursor: 'pointer' }}
         >›</button>
       </div>
 
       {/* Day headers */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4, marginBottom: 4 }}>
         {DAY_NAMES.map(d => (
-          <div key={d} style={{ textAlign: 'center', fontSize: 11, color: '#606060', padding: '4px 0' }}>{d}</div>
+          <div key={d} style={{ textAlign: 'center', fontSize: 11, color: '#B5AFA9', padding: '4px 0' }}>{d}</div>
         ))}
       </div>
 
@@ -213,13 +213,13 @@ export default function AvailabilityCalendar({ value, onChange, bookedDates = []
                 borderRadius: 10,
                 fontSize: 13,
                 fontWeight: isToday ? 700 : 400,
-                border: isToday ? '2px solid #7B5CF0' : isBooked ? '1px solid rgba(255,77,77,0.5)' : '1px solid transparent',
+                border: isToday ? '2px solid #FF6B4A' : isBooked ? '1px solid rgba(255,77,77,0.5)' : '1px solid transparent',
                 background: isBooked
-                  ? 'rgba(255,77,77,0.35)'
+                  ? 'rgba(255,77,77,0.15)'
                   : isSelected
-                  ? 'rgba(76,175,80,0.25)'
-                  : isPast ? 'transparent' : '#1A1A1A',
-                color: isBooked ? '#FF4D4D' : isSelected ? '#4CAF50' : isPast ? '#2A2A2A' : '#fff',
+                  ? 'rgba(76,175,80,0.18)'
+                  : isPast ? 'transparent' : '#FAF7F4',
+                color: isBooked ? '#FF4D4D' : isSelected ? '#4CAF50' : isPast ? '#D0C9C1' : '#2B2A28',
                 cursor: isPast || isBooked ? 'not-allowed' : 'pointer',
                 transition: 'all 0.15s',
                 position: 'relative',
@@ -249,7 +249,7 @@ export default function AvailabilityCalendar({ value, onChange, bookedDates = []
       )}
 
       {/* Legend */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: 12, fontSize: 12, color: '#606060' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: 12, fontSize: 12, color: '#8C8A86' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
           <div style={{ width: 12, height: 12, borderRadius: 4, background: 'rgba(76,175,80,0.25)', border: '1px solid #4CAF50' }} />
           Доступно
@@ -261,7 +261,7 @@ export default function AvailabilityCalendar({ value, onChange, bookedDates = []
           </div>
         )}
         <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-          <div style={{ width: 12, height: 12, borderRadius: 4, background: '#1A1A1A', border: '1px solid #2A2A2A' }} />
+          <div style={{ width: 12, height: 12, borderRadius: 4, background: '#FAF7F4', border: '1px solid #E5DDD5' }} />
           Нажмите чтобы добавить
         </div>
       </div>
@@ -269,7 +269,7 @@ export default function AvailabilityCalendar({ value, onChange, bookedDates = []
       {/* Individual time per day */}
       {useIndividualTime && value.length > 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 8 }}>
-          <p style={{ color: '#A0A0A0', fontSize: 12, fontWeight: 600, marginBottom: 4 }}>
+          <p style={{ color: '#8C8A86', fontSize: 12, fontWeight: 600, marginBottom: 4 }}>
             Время по дням:
           </p>
           {[...value].sort((a, b) => a.date.localeCompare(b.date)).map(slot => (
@@ -277,8 +277,8 @@ export default function AvailabilityCalendar({ value, onChange, bookedDates = []
               key={slot.date}
               ref={el => { rowRefs.current[slot.date] = el }}
               style={{
-                background: '#1A1A1A',
-                border: expandedDate === slot.date ? '1px solid rgba(123,92,240,0.4)' : '1px solid #2A2A2A',
+                background: '#FFFFFF',
+                border: expandedDate === slot.date ? '1px solid rgba(255,107,74,0.4)' : '1px solid #E5DDD5',
                 borderRadius: 12,
                 overflow: 'hidden',
                 transition: 'border-color 0.2s',
@@ -298,10 +298,10 @@ export default function AvailabilityCalendar({ value, onChange, bookedDates = []
                   {new Date(slot.date + 'T12:00:00').toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', weekday: 'short' })}
                 </span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ color: '#A0A0A0', fontSize: 12 }}>
+                  <span style={{ color: '#8C8A86', fontSize: 12 }}>
                     {slot.time_from} — {slot.time_to}
                   </span>
-                  <span style={{ color: '#606060', fontSize: 14 }}>
+                  <span style={{ color: '#B5AFA9', fontSize: 14 }}>
                     {expandedDate === slot.date ? '▲' : '▼'}
                   </span>
                 </div>
@@ -314,7 +314,7 @@ export default function AvailabilityCalendar({ value, onChange, bookedDates = []
                   alignItems: 'center',
                 }}>
                   <div style={{ flex: 1 }}>
-                    <label style={{ display: 'block', fontSize: 11, color: '#606060', marginBottom: 4 }}>С</label>
+                    <label style={{ display: 'block', fontSize: 11, color: '#8C8A86', marginBottom: 4 }}>С</label>
                     <input
                       type="time"
                       value={slot.time_from}
@@ -322,9 +322,9 @@ export default function AvailabilityCalendar({ value, onChange, bookedDates = []
                       style={{ padding: '8px 10px', fontSize: 14 }}
                     />
                   </div>
-                  <span style={{ color: '#606060', fontSize: 14, marginTop: 18 }}>—</span>
+                  <span style={{ color: '#8C8A86', fontSize: 14, marginTop: 18 }}>—</span>
                   <div style={{ flex: 1 }}>
-                    <label style={{ display: 'block', fontSize: 11, color: '#606060', marginBottom: 4 }}>До</label>
+                    <label style={{ display: 'block', fontSize: 11, color: '#8C8A86', marginBottom: 4 }}>До</label>
                     <input
                       type="time"
                       value={slot.time_to}

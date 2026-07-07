@@ -104,7 +104,7 @@ export default function AvailabilityManager({ itemId, pickupHours, pickupNote, u
           onChange={(e) => { setHours(e.target.value); setSaved(false) }}
           placeholder="Например: Пн–Пт после 19:00, Сб–Вс 10:00–15:00"
         />
-        <p style={{ color: '#606060', fontSize: 11, marginTop: 4 }}>Арендатор увидит это на странице объявления</p>
+        <p style={{ color: '#8C8A86', fontSize: 11, marginTop: 4 }}>Арендатор увидит это на странице объявления</p>
       </div>
 
       {/* Pickup note */}
@@ -124,15 +124,15 @@ export default function AvailabilityManager({ itemId, pickupHours, pickupNote, u
       {/* Calendar */}
       <div style={{ marginBottom: 16 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-          <button onClick={prevMonth} style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: 10, padding: '6px 14px', color: '#fff', fontSize: 18 }}>‹</button>
-          <span style={{ color: '#fff', fontWeight: 600, fontSize: 15 }}>{MONTH_NAMES[month]} {year}</span>
-          <button onClick={nextMonth} style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: 10, padding: '6px 14px', color: '#fff', fontSize: 18 }}>›</button>
+          <button onClick={prevMonth} style={{ background: '#FAF7F4', border: '1px solid #E5DDD5', borderRadius: 10, padding: '6px 14px', color: '#2B2A28', fontSize: 18 }}>‹</button>
+          <span style={{ color: '#2B2A28', fontWeight: 600, fontSize: 15 }}>{MONTH_NAMES[month]} {year}</span>
+          <button onClick={nextMonth} style={{ background: '#FAF7F4', border: '1px solid #E5DDD5', borderRadius: 10, padding: '6px 14px', color: '#2B2A28', fontSize: 18 }}>›</button>
         </div>
 
         {/* Day headers */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4, marginBottom: 4 }}>
           {DAY_NAMES.map(d => (
-            <div key={d} style={{ textAlign: 'center', fontSize: 11, color: '#606060', padding: '4px 0' }}>{d}</div>
+            <div key={d} style={{ textAlign: 'center', fontSize: 11, color: '#B5AFA9', padding: '4px 0' }}>{d}</div>
           ))}
         </div>
 
@@ -156,19 +156,19 @@ export default function AvailabilityManager({ itemId, pickupHours, pickupNote, u
                   borderRadius: 10,
                   fontSize: 13,
                   fontWeight: isToday ? 700 : 400,
-                  border: isToday ? '2px solid #7B5CF0' : isBooked ? '1px solid rgba(255,77,77,0.5)' : '1px solid transparent',
+                  border: isToday ? '2px solid #FF6B4A' : isBooked ? '1px solid rgba(255,77,77,0.5)' : '1px solid transparent',
                   background: isBooked
-                    ? 'rgba(255,77,77,0.35)'
+                    ? 'rgba(255,77,77,0.15)'
                     : isBlocked
-                    ? 'rgba(255,77,77,0.25)'
+                    ? 'rgba(255,77,77,0.12)'
                     : isPast
                     ? 'transparent'
-                    : '#1A1A1A',
+                    : '#FAF7F4',
                   color: isBooked || isBlocked
                     ? '#FF4D4D'
                     : isPast
-                    ? '#333'
-                    : '#fff',
+                    ? '#D0C9C1'
+                    : '#2B2A28',
                   cursor: isPast || isBooked ? 'not-allowed' : 'pointer',
                   transition: 'all 0.15s',
                   position: 'relative',
@@ -182,9 +182,9 @@ export default function AvailabilityManager({ itemId, pickupHours, pickupNote, u
       </div>
 
       {/* Legend */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: 16, fontSize: 12, color: '#606060' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: 16, fontSize: 12, color: '#8C8A86' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <div style={{ width: 12, height: 12, borderRadius: 4, background: '#1A1A1A', border: '1px solid #2A2A2A' }} />
+          <div style={{ width: 12, height: 12, borderRadius: 4, background: '#FAF7F4', border: '1px solid #E5DDD5' }} />
           Доступно
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -206,7 +206,7 @@ export default function AvailabilityManager({ itemId, pickupHours, pickupNote, u
         </div>
       )}
 
-      <p style={{ color: '#606060', fontSize: 12, marginBottom: 16 }}>
+      <p style={{ color: '#8C8A86', fontSize: 12, marginBottom: 16 }}>
         Нажмите на дату чтобы закрыть её вручную. Красные даты с арендой менять нельзя.
       </p>
 

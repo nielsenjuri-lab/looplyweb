@@ -15,7 +15,7 @@ export default function ItemCard({ item }: { item: Item }) {
         {/* Image */}
         <div style={{
           aspectRatio: '1/1',
-          background: '#1A1A1A',
+          background: '#EFE8E0',
           position: 'relative',
           overflow: 'hidden',
         }}>
@@ -46,12 +46,12 @@ export default function ItemCard({ item }: { item: Item }) {
           {/* District badge */}
           <div style={{
             position: 'absolute', bottom: 8, left: 8,
-            background: 'rgba(13,13,13,0.8)',
+            background: 'rgba(43,42,40,0.65)',
             backdropFilter: 'blur(8px)',
             borderRadius: 8,
             padding: '3px 8px',
             fontSize: 11,
-            color: '#A0A0A0',
+            color: '#F4EDE3',
           }}>
             {item.district}
           </div>
@@ -61,7 +61,7 @@ export default function ItemCard({ item }: { item: Item }) {
         <div style={{ padding: '10px 12px 12px' }}>
           <p style={{
             fontSize: 13,
-            color: '#fff',
+            color: '#2B2A28',
             fontWeight: 500,
             lineHeight: 1.3,
             marginBottom: 6,
@@ -74,7 +74,7 @@ export default function ItemCard({ item }: { item: Item }) {
           </p>
 
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: 15, fontWeight: 700, color: '#7B5CF0' }}>
+            <span style={{ fontSize: 15, fontWeight: 700, color: '#FF6B4A' }}>
               {item.price_per_day.toLocaleString('ru-RU')} ₽/день
             </span>
           </div>

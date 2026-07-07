@@ -84,9 +84,9 @@ export default function BookingActions({ bookingId, status, role, onConfirmed }:
           disabled={loading}
           style={{
             width: '100%', padding: '10px', borderRadius: 10,
-            background: 'rgba(123,92,240,0.15)',
-            border: '1px solid rgba(123,92,240,0.3)',
-            color: '#7B5CF0', fontWeight: 600, fontSize: 13,
+            background: 'rgba(255,107,74,0.08)',
+            border: '1px solid rgba(255,107,74,0.25)',
+            color: '#FF6B4A', fontWeight: 600, fontSize: 13,
             cursor: loading ? 'not-allowed' : 'pointer',
             opacity: loading ? 0.6 : 1,
           }}

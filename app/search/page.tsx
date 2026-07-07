@@ -34,10 +34,10 @@ export default async function SearchPage({
       <div style={{
         padding: '16px',
         position: 'sticky', top: 0,
-        background: 'rgba(13,13,13,0.95)',
+        background: 'rgba(244,237,227,0.95)',
         backdropFilter: 'blur(20px)',
         zIndex: 50,
-        borderBottom: '1px solid #1A1A1A',
+        borderBottom: '1px solid #E5DDD5',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <BackButton />
@@ -55,13 +55,13 @@ export default async function SearchPage({
 
       <div style={{ padding: '16px 12px' }}>
         {q && items.length === 0 && (
-          <div style={{ textAlign: 'center', padding: '48px 0', color: '#606060' }}>
+          <div style={{ textAlign: 'center', padding: '48px 0', color: '#8C8A86' }}>
             <p style={{ fontSize: 32, marginBottom: 12 }}>🔍</p>
             <p>По запросу «{q}» ничего не найдено</p>
           </div>
         )}
         {!q && (
-          <div style={{ textAlign: 'center', padding: '48px 0', color: '#606060' }}>
+          <div style={{ textAlign: 'center', padding: '48px 0', color: '#8C8A86' }}>
             <p style={{ fontSize: 32, marginBottom: 12 }}>🔍</p>
             <p>Введите запрос для поиска</p>
           </div>

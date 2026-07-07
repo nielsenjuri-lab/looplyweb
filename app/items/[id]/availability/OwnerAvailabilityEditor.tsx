@@ -76,7 +76,7 @@ export default function OwnerAvailabilityEditor({ itemId, itemStatus, pickupNote
         <label style={{ display: 'block', fontSize: 13, color: '#A0A0A0', fontWeight: 500, marginBottom: 8 }}>
           📅 Когда готовы передать вещь
         </label>
-        <p style={{ color: '#606060', fontSize: 12, marginBottom: 12, lineHeight: 1.5 }}>
+        <p style={{ color: '#8C8A86', fontSize: 12, marginBottom: 12, lineHeight: 1.5 }}>
           Зелёные дни — доступны для аренды. Красные — заняты (заявка или аренда на 1+ дней).
         </p>
         <AvailabilityCalendar

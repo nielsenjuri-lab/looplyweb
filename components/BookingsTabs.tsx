@@ -12,9 +12,9 @@ import type { BookingStatus } from '@/lib/types'
 
 const STATUS_LABELS: Record<string, { label: string; color: string; bg: string }> = {
   pending:   { label: 'Ожидает',      color: '#FFB700', bg: 'rgba(255,183,0,0.12)' },
-  confirmed: { label: 'Подтверждено', color: '#5B8AF0', bg: 'rgba(91,138,240,0.12)' },
+  confirmed: { label: 'Подтверждено', color: '#8FA79A', bg: 'rgba(143,167,154,0.15)' },
   active:    { label: 'Активна',      color: '#4CAF50', bg: 'rgba(76,175,80,0.12)' },
-  completed: { label: 'Завершена',    color: '#606060', bg: 'rgba(96,96,96,0.12)' },
+  completed: { label: 'Завершена',    color: '#8C8A86', bg: 'rgba(140,138,134,0.12)' },
   cancelled: { label: 'Отменена',     color: '#FF4D4D', bg: 'rgba(255,77,77,0.12)' },
 }
 
@@ -67,12 +67,12 @@ function BookingCard({
   const chatWritable = CHAT_WRITABLE_STATUSES.includes(booking.status)
 
   return (
-    <div style={{ background: '#1A1A1A', borderRadius: 16, overflow: 'hidden' }}>
+    <div style={{ background: '#FFFFFF', borderRadius: 16, overflow: 'hidden', border: '1px solid #E5DDD5' }}>
       <div style={{ display: 'flex', gap: 12, padding: '14px' }}>
         <Link href={item ? `/items/${item.id}` : '#'} style={{ flexShrink: 0 }}>
           <div style={{
             width: 64, height: 64, borderRadius: 12,
-            background: '#222', overflow: 'hidden',
+            background: '#EFE8E0', overflow: 'hidden',
           }}>
             {item?.image_urls?.[0] ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -84,19 +84,19 @@ function BookingCard({
         </Link>
 
         <div style={{ flex: 1, minWidth: 0 }}>
-          <p style={{ color: '#fff', fontWeight: 500, fontSize: 14, marginBottom: 4 }}>
+          <p style={{ color: '#2B2A28', fontWeight: 500, fontSize: 14, marginBottom: 4 }}>
             {item?.title || 'Объявление'}
           </p>
-          <p style={{ color: '#606060', fontSize: 12 }}>
+          <p style={{ color: '#8C8A86', fontSize: 12 }}>
             {isSingleDay
               ? new Date(booking.start_date + 'T12:00:00').toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })
               : `${new Date(booking.start_date + 'T12:00:00').toLocaleDateString('ru-RU')} — ${new Date(booking.end_date + 'T12:00:00').toLocaleDateString('ru-RU')}`}
           </p>
-          <p style={{ color: '#A0A0A0', fontSize: 12, marginTop: 4 }}>
+          <p style={{ color: '#8C8A86', fontSize: 12, marginTop: 4 }}>
             {booking.personLabel}: {booking.person?.name || 'Пользователь'}
             {booking.person?.review_count ? ` · ★ ${Number(booking.person.rating).toFixed(1)}` : ''}
           </p>
-          <p style={{ color: '#7B5CF0', fontSize: 13, fontWeight: 600, marginTop: 4 }}>
+          <p style={{ color: '#FF6B4A', fontSize: 13, fontWeight: 600, marginTop: 4 }}>
             {booking.total_amount.toLocaleString('ru-RU')} ₽
           </p>
           <p style={{ color: '#404040', fontSize: 10, marginTop: 4 }}>
@@ -128,9 +128,9 @@ function BookingCard({
             onClick={() => onOpenChat(booking)}
             style={{
               width: '100%', padding: '11px', borderRadius: 10,
-              background: chatWritable ? 'rgba(123,92,240,0.18)' : 'rgba(96,96,96,0.12)',
-              border: chatWritable ? '1px solid rgba(123,92,240,0.35)' : '1px solid #2A2A2A',
-              color: chatWritable ? '#B89CFF' : '#A0A0A0',
+              background: chatWritable ? 'rgba(255,107,74,0.08)' : '#FAF7F4',
+              border: chatWritable ? '1px solid rgba(255,107,74,0.3)' : '1px solid #E5DDD5',
+              color: chatWritable ? '#FF6B4A' : '#8C8A86',
               fontWeight: 600, fontSize: 13, cursor: 'pointer',
             }}
           >
@@ -229,16 +229,16 @@ export default function BookingsTabs({
     <>
       <div style={{
         display: 'flex', gap: 8, padding: '12px 16px 0',
-        borderBottom: '1px solid #1A1A1A',
+        borderBottom: '1px solid #E5DDD5',
       }}>
         <button
           type="button"
           onClick={() => setTab('renter')}
           style={{
             flex: 1, padding: '10px 0', border: 'none', background: 'transparent',
-            color: tab === 'renter' ? '#fff' : '#606060',
+            color: tab === 'renter' ? '#2B2A28' : '#8C8A86',
             fontWeight: tab === 'renter' ? 600 : 400, fontSize: 14,
-            borderBottom: tab === 'renter' ? '2px solid #7B5CF0' : '2px solid transparent',
+            borderBottom: tab === 'renter' ? '2px solid #FF6B4A' : '2px solid transparent',
             cursor: 'pointer',
           }}
         >
@@ -249,9 +249,9 @@ export default function BookingsTabs({
           onClick={() => setTab('owner')}
           style={{
             flex: 1, padding: '10px 0', border: 'none', background: 'transparent',
-            color: tab === 'owner' ? '#fff' : '#606060',
+            color: tab === 'owner' ? '#2B2A28' : '#8C8A86',
             fontWeight: tab === 'owner' ? 600 : 400, fontSize: 14,
-            borderBottom: tab === 'owner' ? '2px solid #7B5CF0' : '2px solid transparent',
+            borderBottom: tab === 'owner' ? '2px solid #FF6B4A' : '2px solid transparent',
             cursor: 'pointer',
             position: 'relative',
           }}
@@ -274,10 +274,10 @@ export default function BookingsTabs({
         {list.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '60px 0' }}>
             <p style={{ fontSize: 40, marginBottom: 12 }}>{tab === 'renter' ? '📅' : '📬'}</p>
-            <p style={{ color: '#fff', fontWeight: 600, marginBottom: 6 }}>
+            <p style={{ color: '#2B2A28', fontWeight: 600, marginBottom: 6 }}>
               {tab === 'renter' ? 'Нет аренд' : 'Нет заявок'}
             </p>
-            <p style={{ color: '#606060', fontSize: 14 }}>
+            <p style={{ color: '#8C8A86', fontSize: 14 }}>
               {tab === 'renter'
                 ? 'Найдите что-нибудь в каталоге'
                 : 'Когда кто-то захочет взять вашу вещь — заявка появится здесь'}

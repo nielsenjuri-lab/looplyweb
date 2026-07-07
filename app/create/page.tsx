@@ -121,7 +121,7 @@ export default function CreatePage() {
 
   if (!authReady) {
     return (
-      <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#606060' }}>
+      <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#8C8A86' }}>
         Загрузка...
       </div>
     )
@@ -129,16 +129,16 @@ export default function CreatePage() {
 
   return (
     <div style={{ paddingBottom: 100 }}>
-      <header style={{ padding: '20px 16px 16px', borderBottom: '1px solid #1A1A1A' }}>
-        <h1 style={{ fontSize: 20, fontWeight: 700, color: '#fff' }}>Новое объявление</h1>
-        <p style={{ color: '#606060', fontSize: 13, marginTop: 4 }}>Расскажите о вашей вещи</p>
+      <header style={{ padding: '20px 16px 16px', borderBottom: '1px solid #E5DDD5' }}>
+        <h1 style={{ fontSize: 20, fontWeight: 700, color: '#2B2A28' }}>Новое объявление</h1>
+        <p style={{ color: '#8C8A86', fontSize: 13, marginTop: 4 }}>Расскажите о вашей вещи</p>
       </header>
 
       <form onSubmit={handleSubmit} style={{ padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: 16 }}>
 
         {/* Photo upload */}
         <div>
-          <label style={{ display: 'block', fontSize: 13, color: '#A0A0A0', marginBottom: 8, fontWeight: 500 }}>
+          <label style={{ display: 'block', fontSize: 13, color: '#8C8A86', marginBottom: 8, fontWeight: 500 }}>
             Фотографии (до 5 штук)
           </label>
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
@@ -148,7 +148,7 @@ export default function CreatePage() {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={src} alt="" style={{
                   width: 80, height: 80, borderRadius: 12,
-                  objectFit: 'cover', border: '1px solid #2A2A2A',
+                  objectFit: 'cover', border: '1px solid #E5DDD5',
                 }} />
                 <button
                   type="button"
@@ -174,9 +174,9 @@ export default function CreatePage() {
                 onClick={() => cameraInputRef.current?.click()}
                 style={{
                   flex: 1, borderRadius: 12, padding: '12px 14px',
-                  border: '1px solid rgba(123,92,240,0.3)',
-                  background: 'rgba(123,92,240,0.1)',
-                  color: '#7B5CF0', fontSize: 13, fontWeight: 600,
+                  border: '1px solid rgba(255,107,74,0.3)',
+                  background: 'rgba(255,107,74,0.08)',
+                  color: '#FF6B4A', fontSize: 13, fontWeight: 600,
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                 }}
               >
@@ -188,9 +188,9 @@ export default function CreatePage() {
                 onClick={() => galleryInputRef.current?.click()}
                 style={{
                   flex: 1, borderRadius: 12, padding: '12px 14px',
-                  border: '1px solid #2A2A2A',
-                  background: '#1A1A1A',
-                  color: '#A0A0A0', fontSize: 13, fontWeight: 600,
+                  border: '1px solid #E5DDD5',
+                  background: '#FAF7F4',
+                  color: '#8C8A86', fontSize: 13, fontWeight: 600,
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                 }}
               >
@@ -201,7 +201,7 @@ export default function CreatePage() {
           )}
 
           {photos.length > 0 && (
-            <p style={{ color: '#606060', fontSize: 12, marginTop: 8 }}>
+            <p style={{ color: '#8C8A86', fontSize: 12, marginTop: 8 }}>
               {photos.length} из 5 фото
             </p>
           )}
@@ -305,10 +305,10 @@ export default function CreatePage() {
 
         {/* Availability calendar */}
         <div>
-          <label style={{ display: 'block', fontSize: 13, color: '#A0A0A0', marginBottom: 8, fontWeight: 500 }}>
+          <label style={{ display: 'block', fontSize: 13, color: '#8C8A86', marginBottom: 8, fontWeight: 500 }}>
             📅 Когда готовы передать вещь
           </label>
-          <p style={{ color: '#606060', fontSize: 12, marginBottom: 12, lineHeight: 1.5 }}>
+          <p style={{ color: '#8C8A86', fontSize: 12, marginBottom: 12, lineHeight: 1.5 }}>
             Выберите дни когда сможете встретиться с арендатором и задайте время. Арендатор сможет бронировать только эти дни.
           </p>
           <AvailabilityCalendar
@@ -329,10 +329,10 @@ export default function CreatePage() {
         )}
 
         <div style={{
-          background: 'rgba(123,92,240,0.1)',
+          background: 'rgba(255,107,74,0.08)',
           border: '1px solid rgba(123,92,240,0.2)',
           borderRadius: 12, padding: '12px 14px',
-          fontSize: 13, color: '#A0A0A0', lineHeight: 1.5,
+          fontSize: 13, color: '#8C8A86', lineHeight: 1.5,
         }}>
           💡 После создания объявление пройдёт модерацию (обычно 24 часа) и станет видно всем.
         </div>
@@ -350,7 +350,7 @@ export default function CreatePage() {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <label style={{ display: 'block', fontSize: 13, color: '#A0A0A0', marginBottom: 6, fontWeight: 500 }}>
+      <label style={{ display: 'block', fontSize: 13, color: '#8C8A86', marginBottom: 6, fontWeight: 500 }}>
         {label}
       </label>
       {children}
