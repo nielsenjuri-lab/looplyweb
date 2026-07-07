@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import BookingActions from '@/components/BookingActions'
 import BookingChat from '@/components/BookingChat'
@@ -99,6 +99,9 @@ function BookingCard({
           <p style={{ color: '#7B5CF0', fontSize: 13, fontWeight: 600, marginTop: 4 }}>
             {booking.total_amount.toLocaleString('ru-RU')} ₽
           </p>
+          <p style={{ color: '#404040', fontSize: 10, marginTop: 4 }}>
+            № {booking.id.slice(0, 8).toUpperCase()}
+          </p>
         </div>
 
         <div style={{
@@ -194,11 +197,17 @@ export default function BookingsTabs({
   const pendingIncoming = asOwner.filter(b => b.status === 'pending').length
   const [tab, setTab] = useState<'renter' | 'owner'>(initialTab || 'renter')
   const [chatBooking, setChatBooking] = useState<BookingRow | null>(null)
+  const chatDismissed = useRef(false)
   const list = tab === 'renter' ? asRenter : asOwner
   const allBookings = [...asRenter, ...asOwner]
 
   function openChat(booking: BookingRow) {
     setChatBooking(booking)
+  }
+
+  function closeChat() {
+    chatDismissed.current = true
+    setChatBooking(null)
   }
 
   function openChatById(bookingId: string, optimisticStatus?: BookingStatus) {
@@ -210,8 +219,11 @@ export default function BookingsTabs({
   }
 
   useEffect(() => {
-    if (initialOpenChatId) openChatById(initialOpenChatId)
-  }, [initialOpenChatId, asRenter, asOwner])
+    if (!initialOpenChatId || chatDismissed.current) return
+    openChatById(initialOpenChatId)
+  // Открываем чат из URL только при первом заходе, не после закрытия и refresh
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return (
     <>
@@ -299,7 +311,7 @@ export default function BookingsTabs({
           otherPersonName={chatBooking.person.name || 'Пользователь'}
           itemTitle={chatBooking.item?.title || 'Объявление'}
           open={!!chatBooking}
-          onClose={() => setChatBooking(null)}
+          onClose={closeChat}
         />
       )}
     </>

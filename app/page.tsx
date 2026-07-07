@@ -33,6 +33,15 @@ export default async function HomePage({
 
   const { data: rawItems } = await query
   const itemsList = (rawItems as Item[]) || []
+
+  const { data: publishedCategories } = await supabase
+    .from('items')
+    .select('category_id')
+    .eq('status', 'published')
+
+  const categoryIdsWithItems = new Set((publishedCategories || []).map(r => r.category_id))
+  const visibleCategories = CATEGORIES.filter(c => categoryIdsWithItems.has(c.id))
+
   const ownerIds = [...new Set(itemsList.map((i) => i.owner_id))]
   const ratings = await getOwnerRatings(supabase, ownerIds)
   const items = attachOwnerRatings(itemsList, ratings)
@@ -50,30 +59,34 @@ export default async function HomePage({
         borderBottom: '1px solid #1A1A1A',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-          {/* Logo */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{
-              width: 32,
-              height: 32,
-              borderRadius: 10,
-              background: 'linear-gradient(135deg, #7B5CF0, #5B8AF0)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                <path d="M12 12c-2.5-3-6-3-6 0s3.5 3 6 0zm0 0c2.5 3 6 3 6 0s-3.5-3-6 0z"
-                  stroke="white" strokeWidth="1.8" strokeLinecap="round"/>
-              </svg>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{
+                width: 32,
+                height: 32,
+                borderRadius: 10,
+                background: 'linear-gradient(135deg, #7B5CF0, #5B8AF0)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <path d="M12 12c-2.5-3-6-3-6 0s3.5 3 6 0zm0 0c2.5 3 6 3 6 0s-3.5-3-6 0z"
+                    stroke="white" strokeWidth="1.8" strokeLinecap="round"/>
+                </svg>
+              </div>
+              <span style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-0.5px', color: '#fff' }}>
+                looply
+              </span>
             </div>
-            <span style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-0.5px', color: '#fff' }}>
-              looply
-            </span>
+            <p style={{ color: '#606060', fontSize: 11, marginTop: 4, marginLeft: 40 }}>
+              Аренда вещей у соседей
+            </p>
           </div>
           <Link href="/profile" style={{
             width: 36, height: 36, borderRadius: '50%',
             background: '#1A1A1A', border: '1px solid #2A2A2A',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
           }}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
               <circle cx="12" cy="8" r="4" stroke="#A0A0A0" strokeWidth="1.5"/>
@@ -98,7 +111,7 @@ export default async function HomePage({
 
       {/* Filters */}
       <CatalogFilters
-        categories={CATEGORIES}
+        categories={visibleCategories}
         districts={SPB_DISTRICTS}
         activeCategory={params.category}
         activeDistrict={params.district}
